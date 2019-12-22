@@ -1,0 +1,9 @@
+// normalize.css подгружается в файле конфигурации gulp - gulpfile.js
+@import "./layout/variables.scss";
+
+@import "./layout/fonts.scss";
+@import "./layout/fontawesome_all.scss";
+
+@import "./layout/base.scss";
+
+@import "./blocks/*.scss";

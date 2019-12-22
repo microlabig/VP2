@@ -1,0 +1,19 @@
+.auth {
+    width: 50%;
+    max-width: 520px;
+    background-color: $bg-layout-color;
+
+    & .container{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        padding: 47px 80px;
+    }
+}
+
+.auth__title {
+    font-size: 24px;
+    margin-bottom: 15px;
+}

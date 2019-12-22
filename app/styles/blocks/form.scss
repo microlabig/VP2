@@ -1,0 +1,81 @@
+.form {
+    font-size: 16px;
+    color: $text-description-color;
+
+    &.form--chat {
+        font-size: 14px;
+
+        .form__container {
+            flex-direction: row;
+            padding: 10px 12px;
+        }
+
+        .form__input {
+            border: none;
+        }
+
+        .form__button {
+            text-transform: none;
+            padding: 0 20px;
+        }
+    }
+}
+
+.form__container {
+    display: flex;
+    flex-direction: column;
+
+    margin: 0 auto;
+}
+
+.form__label {
+    display: inline-block;
+    text-align: center;
+
+    margin-bottom: 48px;
+}
+
+.form__input-container {
+    margin-bottom: 42px;
+
+    & .form__input {
+        margin-bottom: 33px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.form__input {
+    width: 100%;
+    color: $text-color;
+
+    border-bottom: 1px solid $bg-button-color;
+    
+    padding: 15px 10px;
+
+    &::placeholder {
+        color: $text-placeholder-color;
+    }
+}
+
+.form__button {   
+    text-transform: uppercase;
+    
+    background-color: $bg-button-color;
+    border-radius: $border-radius-button;
+
+    font-size: 15px;
+    color: $text-color;
+
+    width: max-content;
+
+    padding: 10px 30px;
+    margin: 0 auto;
+
+    transition: background-color $delay;
+    &:hover {
+        background-color: $bg-button-hover-color;
+    }
+}

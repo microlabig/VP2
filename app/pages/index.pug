@@ -1,0 +1,58 @@
+include ./mixins
+
+<!DOCTYPE html>
+html(lang="ru")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        meta(http-equiv="X-UA-Compatible", content="ie=edge")
+        title Чат (ВП №2)
+        link(rel="stylesheet" href="main.min.css")
+    body
+        .wrapper
+            //- include ./templates/auth
+            
+            include ./templates/chat
+            
+            //- script(type="text/x-pug-template")#options
+            //- section
+                .options
+                    .options__container
+                        .options__close
+                            button(type="button").options__button
+                        .options__photo
+                            h2.options__title Загрузка фото
+                            .options__content
+                                .options__left
+                                    a(href="").options__avatar
+                                        i.fas.fa-camera
+                                        //- +image("options", "./")
+                                .options__right
+                                    .options__name Алексей Трубин
+                                    .options__status В сети
+
+            //- script(type="text/x-pug-template")#loadphoto
+            //- section
+                .loadphoto
+                    .loadphoto__container
+                        .loadphoto__close
+                            button(type="button").loadphoto__button.loadphoto__button--close
+                        .loadphoto__avatar
+                            a(href="").loadphoto__image
+                                +image("loadphoto", "./")
+                        .loadphoto__description Область для профильной фотографии
+                        .loadphoto__controls
+                            .loadphoto__cancel
+                                button(type="button").loadphoto__button Отмена
+                            .loadphoto__accept
+                                button(type="button").loadphoto__button Сохранить
+            
+        script(src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js" type="text/javascript")
+        script(defer src="main.min.js" type="text/javascript")
+    
+                        
+
+
+
+
+                            

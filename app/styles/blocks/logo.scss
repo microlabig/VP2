@@ -1,0 +1,13 @@
+.logo {
+    margin-bottom: 33px;
+}
+
+.logo__image {
+    position: relative;
+    
+    width: 140px;
+    height: 140px;
+    background-color: $bg-element-color;
+    border-radius: 50%;
+    overflow: hidden;
+}

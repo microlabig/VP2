@@ -1,0 +1,47 @@
+.members {
+    position: relative;
+    height: 100%;
+}
+
+.members__list {
+    position: absolute;
+    top: 0;
+    bottom: 5%;
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+}
+
+.members__item {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    margin-bottom: 12px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.members__avatar {
+    flex-shrink: 0;
+    position: relative;
+
+    overflow: hidden;
+    border-radius: 50%;
+
+    width: 46px;
+    height: 46px;
+
+    background-color: $bg-element-color;
+
+    margin-right: 10px;
+}
+
+.members__lastmessage {
+    color: $text-placeholder-color;
+}
