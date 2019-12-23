@@ -1,0 +1,138 @@
+.loadphoto {
+    position: relative;
+    
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    
+    background-color: rgba($black-color, 0.5);
+}
+
+.loadphoto__container {
+    position: absolute;
+    
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background-color: $bg-layout-color;
+    //border-radius: $border-radius-button;
+
+    min-width: 365px;
+
+    padding: 34px 42px;
+}
+
+// avatar 
+
+.loadphoto__avatar {
+    position: relative;
+    margin-bottom: 13px;
+}
+
+.loadphoto__image {
+    width: 285px;
+    height: 285px;
+    
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: $bg-element-color;
+    
+    margin: 0 auto;
+}
+
+.loadphoto__icon {
+    cursor: pointer;
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: white;
+    font-size: 80px;
+}
+
+.loadphoto__overlay-list {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    background-color: rgba($black-color, .3);
+}
+
+.loadphoto__overlay-item {
+    position: absolute;
+    
+    width: 10px;
+    height: 10px;
+
+    transform: translate(-50%, -50%);
+
+    background-color: rgba($text-color, .3);
+
+    &:nth-child(2) {
+        left: 100%;
+    }
+    &:nth-child(3) {
+        top: 100%;
+    }
+    &:nth-child(4) {
+        top: 100%;
+        left: 100%;
+    }
+}
+
+// text
+
+.loadphoto__description {
+    text-align: center;
+    color: $text-placeholder-color;
+
+    margin-bottom: 24px;
+}
+
+// buttons 
+
+.loadphoto__controls {
+    display: flex;
+    justify-content: flex-end;
+
+    position: relative;
+    
+    right: -20px;
+    font-size: 15px;
+    
+}
+
+.loadphoto__button {
+    outline: none;
+
+    text-transform: uppercase;
+    color: $bg-button-color;
+
+    width: max-content;
+
+    background-color: $bg-button-photo-color;
+    border-radius: $border-radius-button;
+
+    padding: 10px;
+    transition: background-color $delay;
+
+    &:first-child {
+        margin-right: 10px;
+        background-color: transparent;
+    }
+
+    &:hover {
+        background-color: rgba($bg-button-photo-color, .4);
+
+        &:first-child {
+            background-color: rgba($black-color, .1);;
+        }
+    }
+}

@@ -1,6 +1,6 @@
 .main {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     grid-template-rows: 70px 1fr 66px;
     grid-template-areas: 
         "header header header"
@@ -19,6 +19,7 @@
 .main__content {
     grid-area: content;
     background-color: $bg-chat-color;
+    height: 100%;
 }
 
 .main__footer {

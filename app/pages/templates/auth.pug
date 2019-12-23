@@ -1,14 +1,15 @@
 section.auth
     .container
-        .logo
-            .logo__image
-                +image("logo","./images/auth_logo.png")
-        h2.auth__title Авторизация
-        .auth__form
-            form(name="registrationForm").form
-                .form__container
-                    label.form__label Введите пожалуйста свое фио и ник для дальнейшей авторизации
-                    label.form__input-container
-                        input(type="input" placeholder="Введите свое имя").form__input
-                        input(type="input" placeholder="Введите свой ник").form__input
-                    button(type="submit").form__button Войти
+        .auth__wrapper
+            .logo
+                .logo__image
+                    +image("logo","./images/auth_logo.png")
+            h2.auth__title Авторизация
+            .auth__form
+                form(name="registrationForm").form
+                    .form__container
+                        label.form__label Введите пожалуйста свое фио и ник для дальнейшей авторизации
+                        label.form__input-container
+                            input(type="input" placeholder="Введите свое имя" value="Игорь Безместин").form__input
+                            input(type="input" placeholder="Введите свой ник" value="microlabig").form__input
+                        button(type="submit").form__button Войти

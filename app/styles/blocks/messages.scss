@@ -1,17 +1,37 @@
 .messages {
     padding: 4px 12px;
+    height: 100%;
 }
 
 .messages__list {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
+
+    overflow-y: auto;
 }
 
 .messages__item {
     display: flex;
 
-    &.messages__item--me {
+    margin-bottom: 4px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &.hidden { // для скрытия аватарки и изменение формы сообщения
+        .messages__avatar {
+            visibility: hidden;
+            opacity: 0;
+        }
+        .messages__message:before {
+            display: none;
+        }
+    }
+
+    // my messages
+    &.me {
         flex-direction: row-reverse;
         justify-content: flex-start;
 
@@ -29,7 +49,7 @@
         .messages__message {
             background-color: $bg-my-message-color;
 
-            &:first-child::before {
+            &:before {
                 right: -6px;
                 left: auto;
 
@@ -40,37 +60,38 @@
 }
 
 .messages__avatar {
-    flex-shrink: 0;
     position: relative;
+    flex-shrink: 0;
+    align-self: flex-end;
+
     width: 34px;
     height: 34px;
 
-    overflow: hidden;
-    border-radius: 50%;
+    visibility: visible;
+    opacity: 1;
 
     background-color: $bg-element-color;
-    margin-right: 10px;
-}
+    border-radius: 50%;
+    overflow: hidden;
 
-.messages__content {
-    margin-bottom: 4px;
-    flex: 0.45;
+    margin-right: 10px;
 }
 
 .messages__message {
     position: relative;
     display: flex;
+    flex-wrap: nowrap;
     align-items: center;
+    flex-basis: 40%;
 
-    padding: 10px 16px;
-    border-radius: $border-radius-button;
     background-color: $bg-message-color;
+    border-radius: $border-radius-button;
 
     width: fit-content;
 
-    margin-bottom: 4px;
+    padding: 12px 17px;
 
-    &:first-child::before {
+    &:before {
         content: '';
         display: inline-block;
         position: absolute;
@@ -85,10 +106,6 @@
         background: url('./images/shape_left.png') center center no-repeat;
         background-size: contain;
     }
-
-    &:last-child {
-        margin-bottom: 0;
-    }
 }
 
 .messages__text {
@@ -96,11 +113,10 @@
 }
 
 .messages__data {
-    position: relative;
-    top: 7px;
-    left: 7px;
-
-    margin-left: auto;
-    margin-top: auto;
+    align-self: flex-end;
     color: rgba($text-color, .4);
+    
+    position: relative;
+    top: 10px;
+    left: 10px;
 }

@@ -1,0 +1,16 @@
+script(type="text/x-pug-template")#loadphoto
+    //- section
+    .loadphoto
+        .loadphoto__container
+            .loadphoto__avatar
+                div(draggable).loadphoto__image-container
+                    .loadphoto__image
+                        ul.loadphoto__overlay-list
+                            - for (var i = 0; i < 4; i++)
+                                li.loadphoto__overlay-item
+                        .loadphoto__icon
+                            i.fas.fa-camera
+            .loadphoto__description Область для профильной фотографии
+            .loadphoto__controls
+                button(type="button")#cancel.loadphoto__button Отмена
+                button(type="button")#accept.loadphoto__button Сохранить
