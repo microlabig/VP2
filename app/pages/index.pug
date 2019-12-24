@@ -10,12 +10,13 @@ html(lang="ru")
         link(rel="stylesheet" href="main.min.css")
     body
         .wrapper
-            //- include ./templates/auth
+            include ./templates/auth
             
             include ./templates/chat
             
-            include ./templates/options
-            include ./templates/loadphoto
+            include ./script-templates/message
+            include ./script-templates/options
+            include ./script-templates/loadphoto
             
         script(src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js" type="text/javascript")
-        script(defer src="main.min.js" type="text/javascript")
+        script(defer src="main.min.js")

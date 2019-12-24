@@ -1,4 +1,4 @@
-section.auth
+section.auth#auth
     .container
         .auth__wrapper
             .logo
@@ -6,10 +6,10 @@ section.auth
                     +image("logo","./images/auth_logo.png")
             h2.auth__title Авторизация
             .auth__form
-                form(name="registrationForm").form
+                form(name="authorizationForm").form
                     .form__container
                         label.form__label Введите пожалуйста свое фио и ник для дальнейшей авторизации
                         label.form__input-container
-                            input(type="input" placeholder="Введите свое имя" value="Игорь Безместин").form__input
-                            input(type="input" placeholder="Введите свой ник" value="microlabig").form__input
-                        button(type="submit").form__button Войти
+                            input(type="input" placeholder="Введите свое имя" name="nameUser" value="Игорь Безместин").form__input
+                            input(type="input" placeholder="Введите свой ник" name="nickNameUser" value="microlabig").form__input
+                        button(type="submit" name="authorizationButton").form__button Войти

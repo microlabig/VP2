@@ -31,19 +31,7 @@ section.chat
                             span.header__text участника
                 .main__content
                     .messages
-                        ul.messages__list
-                            li.messages__item
-                                .messages__avatar
-                                    +image("messages","./images/photo_no-image.png")
-                                .messages__message
-                                    .messages__text Привет 
-                                    .messages__data 17:55
-                            li.messages__item.me
-                                .messages__avatar
-                                    +image("messages","./images/photo_no-image.png")
-                                .messages__message
-                                    .messages__text Привет Lorem, ipsum dolor sit amet consectetur adipisicing elit. Libero, nam tenetur? Quia ratione fugit nostrum, temporibus totam est veritatis sit voluptatum odio quas maxime ad numquam explicabo nam. Facere, corrupti.
-                                    .messages__data 17:55
+                        ul#chatList.messages__list
                 .main__footer
                     form(name="chatForm").form.form--chat
                         .form__container

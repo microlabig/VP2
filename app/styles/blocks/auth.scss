@@ -1,5 +1,15 @@
 .auth {
     z-index: 1;
+    opacity: 1;
+    visibility: visible;
+    transition: $delay;
+    overflow: visible;
+
+    &.hidden {
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+    }
 
     & .container{
         position: absolute;

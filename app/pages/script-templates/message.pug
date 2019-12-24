@@ -1,0 +1,8 @@
+script(type="text/x-pug-template")#message
+    li.messages__item
+        .messages__avatar
+            //- {{avatar path}}
+            +image("messages","{{path}}")
+        .messages__message
+            .messages__text {{text}}
+            .messages__data {{date}}
