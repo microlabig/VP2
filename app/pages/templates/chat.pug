@@ -2,33 +2,20 @@ section.chat
     .container
         aside.chat__left
             .menu
-                ul.menu__addition
+                ul.menu__addition#menuButton
                     - for (var i = 0; i < 3; i++)
                         li.menu__button
                 .menu__search
-                    input(type="input" placeholder="Найти...").menu__search-input
+                    input(type="input" placeholder="Найти...")#findInput.menu__search-input
             .members
-                ul.members__list
-                    li.members__item.members__item--me
-                        .members__avatar
-                            +image("members", "./images/photo_no-image.png")
-                        .members__info
-                            .members__name Игорь Яицкий 
-                            .members__lastmessage Рад был пообщаться
-                    li.members__item
-                        .members__avatar
-                            +image("members","./images/photo_no-image.png")
-                        .members__info
-                            .members__name Алексей Трубин
-                            .members__lastmessage Привет!
+                ul.members__list#membersList
         .chat__right
             main.main
                 .main__header
                     .header
                         h1.header__title Чат
                         .header__q-members
-                            span.header__quantity 2 
-                            span.header__text участника
+                            #usersQuantity
                 .main__content
                     .messages
                         ul#chatList.messages__list

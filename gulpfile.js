@@ -156,7 +156,9 @@ task("copy:fonts", () => {
 task('server', () => {
     browserSync.init({
         server: {
-            baseDir: `./${DIST_PATH}`
+            baseDir: `./${DIST_PATH}`,
+            // ghostMode: false,
+            // codeSync: false
         },
         open: false
     });

@@ -1,15 +1,35 @@
 .options {
-    position: relative;
+    z-index: 1;
+    opacity: 1;
+    visibility: visible;
+    overflow: visible;
     
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    transition: $delay;
+
+    &.hidden {
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+    }
+    /* &.show {
+        opacity: 1;
+        visibility: visible;
+        overflow: visible
+    } */
+
+    & .container{
+        position: absolute;
     
-    background-color: rgba($black-color, .5);
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        
+        background-color: rgba($black-color, 0.5);
+    }
 }
 
-.options__container {
+.options__wrapper {
     position: absolute;
     
     top: 50%;

@@ -1,7 +1,9 @@
-const webSocket = require('ws');
-const port = 3030;
-const server = new webSocket.Server({
-  port: port,
+const PORT = 3030; // порт 3030
+const DEFAULT_AVATAR_SRC    = './images/photo_no-image.png';
+
+const webSocket = require('ws'); // загружаем веб-сокет
+const server = new webSocket.Server({ // создаем новый вебсокет-сервер
+  port: PORT,
   clientTracking: true
 });
 
@@ -77,9 +79,6 @@ server.on('connection', ws => {
                 sendMessage(message);
                 break;
         }
-
-        //console.log('[message]',message);
-        //console.log('---', clients.getAllClients());
     });
 
     // если пользователь закрыл соединение
@@ -129,11 +128,11 @@ function sendAllUsers() {
 
 
 
-//-------------------------------
+/* //-------------------------------
 //-------------------------------
 console.info(`
     Добро пожаловать на мой сервер
-    Путь: ws://localhost:${port}
+    Путь: ws://localhost:${PORT}
 `);
 //-------------------------------
-//-------------------------------
+//------------------------------- */
