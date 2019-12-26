@@ -1,16 +1,18 @@
-script(type="text/x-pug-template")#loadphoto
-    //- section
-    .loadphoto
-        .loadphoto__container
+#loadhoto.loadphoto.hidden
+    .container
+        .loadphoto__wrapper
             .loadphoto__avatar
-                div(draggable).loadphoto__image-container
-                    .loadphoto__image
-                        ul.loadphoto__overlay-list
-                            - for (var i = 0; i < 4; i++)
-                                li.loadphoto__overlay-item
-                        .loadphoto__icon
-                            i.fas.fa-camera
+                label(draggable)#dragContainer.loadphoto__image-container
+                    input(type="file").loadphoto__input
+                    #loadPhotoImage
             .loadphoto__description Область для профильной фотографии
             .loadphoto__controls
-                button(type="button")#cancel.loadphoto__button Отмена
-                button(type="button")#accept.loadphoto__button Сохранить
+                button(type="button").loadphoto__button.cancel Отмена
+                button(type="submit").loadphoto__button.apply Сохранить
+
+script(type="text/x-pug-template")#loadPhotoIcon
+        .loadphoto__image
+            ul.loadphoto__overlay
+                - for (var i = 0; i < 4; i++)
+                    li.loadphoto__dots
+            +image("loadphoto","{{path}}")

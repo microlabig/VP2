@@ -19,6 +19,7 @@ class User {
         this.nickName = nickName;
         this.avatar = DEFAULT_AVATAR_SRC;
         this.text = '';
+        this.avatarsContainer = [];
     }
 
     /* getFullName() {
@@ -38,6 +39,10 @@ class User {
     }
 }
 
+// ----------------------------------------------------
+// Функция, возвращающая окончание для существительного 
+// в зависимости от количества пользователей
+// ----------------------------------------------------
 function getEnding(length) {
     const rest = length % 10;
     let dozen = Math.floor(length / 10);
@@ -72,10 +77,10 @@ function dateToTime(date) {
 }
 
 // ------------------------------------------------------------------------
-// Функция возвращающая резулььаь проверки типа последнего сообщения в чате
+// Функция возвращающая результат проверки типа последнего сообщения в чате
 // ------------------------------------------------------------------------
 function getValueHiddenClass(ulList, isMyMessage) {
-    const liList = ulList.querySelectorAll('li');
+    const liList = ulList.querySelectorAll('li'); // найдем все сообщения из списка сообщений
     
     if (liList) { // если сообщения есть
         const lastLi = liList[liList.length - 1]; // проверим последнее сообщение
@@ -96,7 +101,9 @@ function getValueHiddenClass(ulList, isMyMessage) {
 // -----------------------------------------------------------------
 // Функция, возвращающая специальный объект для рендеринга сообщения
 // -----------------------------------------------------------------
-function getDataMessage(message, options = {me: false, hidden: false}) { // meContent - собственное (me=true) или чужое (me=false) сообщение
+function getDataMessage(message, options = {me: false, hidden: false}) { 
+    // me - сообщение собственное (me=true) или чужое (me=false) 
+    // hidden - скрыть аватар в сообщении или нет
     return { 
             text: message.users.text,
             name: message.users.name,
@@ -144,7 +151,11 @@ function isUserExist(user) {
 /******************************************************************************
  *                                  V I E W
  *****************************************************************************/
-
+function pushAvatarInContainer(user) {
+    // поиск пользователя в users
+    // если нашли 
+    // TODO:
+}
 // ----------------------------
 // Функция рендеринга сообщения
 // ----------------------------
@@ -156,13 +167,14 @@ function renderMessage(message, options = {}) {
     let hidden = false;
     if (options.type && options.type === 'me') {
         hidden = getValueHiddenClass(chatList, true);
-        fragmentMessage.innerHTML = render(getDataMessage(message, {me: true, hidden: hidden}));
+        fragmentContainer.innerHTML = render(getDataMessage(message, {me: true, hidden: hidden}));
+        // pushAvatarInContainer(me);
     } else {
         hidden = getValueHiddenClass(chatList, false);
-        fragmentMessage.innerHTML = render(getDataMessage(message, {me: false, hidden: hidden}));
+        fragmentContainer.innerHTML = render(getDataMessage(message, {me: false, hidden: hidden}));
     }
     
-    chatList.insertAdjacentHTML("beforeend", fragmentMessage.innerHTML);
+    chatList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
 }
 
 // ---------------------------------------
@@ -170,7 +182,7 @@ function renderMessage(message, options = {}) {
 // ---------------------------------------
 function renderUser(message) {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
-    const userTemplate = document.querySelector('#members').textContent; // шаблон сообщения
+    const userTemplate = document.querySelector('#members').textContent; // шаблон пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
 
     for (const user in message.users) {
@@ -184,82 +196,190 @@ function renderUser(message) {
     memberList.innerHTML = '';
 
     users.forEach( user => {
-        fragmentMessage.innerHTML = render(getDataUser(user));
-        memberList.insertAdjacentHTML("beforeend", fragmentMessage.innerHTML);
+        fragmentContainer.innerHTML = render(getDataUser(user));
+        memberList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
     });
 
     renderQuantityUsers(users);
 }
 
+// ------------------------------------------------------------------------
+// Функция рендеринга списка найденных пользователей по ключевой строке str
+// ------------------------------------------------------------------------
 function renderFindedUsers(str) {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
-    const userTemplate = document.querySelector('#members').textContent; // шаблон сообщения
+    const userTemplate = document.querySelector('#members').textContent; // шаблон искомого пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
 
     const findedUsers = users.filter( user => isMatching(user.name, str) || isMatching(user.nickName, str));
 
+    // сбросим список пользователей в чате
     memberList.innerHTML = '';
 
+    // добавим найденных пользователей в список
     findedUsers.forEach( user => {
-        fragmentMessage.innerHTML = render(getDataUser(user));
-        memberList.insertAdjacentHTML("beforeend", fragmentMessage.innerHTML);
+        fragmentContainer.innerHTML = render(getDataUser(user));
+        memberList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
     });
 }
 
+// -------------------------------------------
+// Функция рендеринга количества пользователей
+// -------------------------------------------
 function renderQuantityUsers() {
     const usersQuantity = document.getElementById('usersQuantity'); // контейнер количества пользователей
     const qMembers = document.querySelector('#qmembers').textContent; // шаблон 
     const render = Handlebars.compile(qMembers); // создадим функцию-рендер html-содержимого
 
-    fragmentMessage.innerHTML = render({usersQuantity: users.length, ending: getEnding(users.length)});
-    usersQuantity.innerHTML = fragmentMessage.innerHTML;
+    fragmentContainer.innerHTML = render({usersQuantity: users.length, ending: getEnding(users.length)});
+    usersQuantity.innerHTML = fragmentContainer.innerHTML;
 }
 
+// ----------------------------------
+// Функция рендеринга попапа настроек
+// ----------------------------------
 function renderOptionsPopup() {
-    const wrapper = document.querySelector('.wrapper'); // контейнер пользователей
-    const optionsTemplate = document.querySelector('#options').textContent; // шаблон сообщения
-    const render = Handlebars.compile(optionsTemplate); // создадим функцию-рендер html-содержимого
+    const optionsPopup = document.getElementById('options');
+    const optionsWrapper = document.getElementById('options__wrapper'); // контейнер
+    const optionsPhotoTemplate = document.querySelector('#optionsPhoto').textContent; 
+    const render = Handlebars.compile(optionsPhotoTemplate); // создадим функцию-рендер html-содержимого
 
-    let optionsPopup = wrapper.querySelector('.options');
+    optionsPopup.addEventListener('click', event => {
+        const target = event.target;
 
-    if (!optionsPopup) {
-        fragmentMessage.innerHTML = render({name: me.name, avatar: me.avatar});
-        wrapper.insertAdjacentHTML("beforeend", fragmentMessage.innerHTML);
+        event.preventDefault();
+        if (target.classList.contains('options__close') || 
+            target.classList.contains('options__button') ||
+            target.classList.contains('container')) {
+            hidePopup(optionsPopup);
+        }
+        if (target.classList.contains('options__left') || 
+            target.classList.contains('options__avatar') ||
+            target.classList.contains('fas'))  {
+            workWithLoadPhotoPopup(optionsPopup);
+        }
+    });
 
-        optionsPopup = wrapper.querySelector('.options');
+    optionsWrapper.innerHTML = render({name: me.name, avatar: me.avatar});
+    
+    showPopup(optionsPopup);
+}
 
-        showPopup(optionsPopup);
 
-        optionsPopup.addEventListener('click', event => {
-            const target = event.target;
-            if (target.classList.contains('options__close') || 
-                target.classList.contains('options__button') ||
-                target.classList.contains('container')) {
-                hidePopup(optionsPopup);
+function workWithLoadPhotoPopup(optionsPopup) {
+    const loadPhotoPopup = document.querySelector('#loadhoto');
+    const loadPhotoImageContainer = document.getElementById('loadPhotoImage'); // контейнер
+    const loadPhotoIconTemplate = document.querySelector('#loadPhotoIcon').textContent; 
+    const render = Handlebars.compile(loadPhotoIconTemplate); // создадим функцию-рендер html-содержимого
+
+    loadPhotoImageContainer.innerHTML = render({path: me.avatar});
+    
+    hidePopup(optionsPopup);
+    showPopup(loadPhotoPopup);
+
+    const applyButton = loadPhotoPopup.querySelector('.apply');
+    const dragContainer = loadPhotoPopup.querySelector('#dragContainer');
+    const loadPhotoImage = loadPhotoPopup.querySelector('.loadphoto__image')
+
+    loadPhotoPopup.addEventListener('click', event => {
+        const target = event.target;
+        if (target.classList.contains('cancel') ||
+            target.classList.contains('container')) {
+                hidePopup(loadPhotoPopup);   
             }
-        });
-    } else {
-        showPopup(optionsPopup);
+    });
+
+    dragContainer.addEventListener('change', event => {
+        event.preventDefault();
+        uploadFile();
+    });
+
+    dragContainer.addEventListener('dragover', event => {
+        event.preventDefault();
+    });
+    dragContainer.addEventListener('dragleave', event => {
+        event.preventDefault();
+    });
+    dragContainer.addEventListener('drop', event => {
+        event.preventDefault();
+        uploadFile();
+    });
+
+    applyButton.addEventListener('click', event => {
+        event.preventDefault();
+        const loadphotoIcon = loadPhotoPopup.querySelector('.loadphoto__icon');
+        me.avatar = loadphotoIcon.src; // сохраняем base64 url в аватар пользователя
+        hidePopup(loadPhotoPopup);
+        repaintAllAvatars();
+    });
+}
+
+function uploadFile() {
+    const file = changeFile(event); // получим файл изображения
+
+    if (file) {
+        const reader = new FileReader(); // создадим экземпляр чтения файла
+
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            const loadphotoIcon = document.querySelector('.loadphoto__icon');
+            loadphotoIcon.src = reader.result; // сохраняем в base64 url
+        }
     }
 }
 
+function changeFile(event, isDragged = false) {
+    let file = null;
+    
+    try {
+        file = event.target.files[0];
+    } catch (error) {
+        file = event.dataTransfer.files[0];
+    }
+    
+    if (file) {
+        // проверим тип файла
+        if (file.type !== "image/jpeg") {
+            alert("Можно загружать только JPG-файлы");
+
+            return;
+        }
+        // если файл больше 512 Кб
+        if (file.size / 1024 > 512) {
+            alert("Для загрузки используйте файлы изображений менее 512 Кб");
+            
+            return;
+        }
+    }
+
+    return file;
+}
+
+function repaintAllAvatars() {
+
+}
+
+// -------------------------------
+// Функция, скрывающая попап popup
+// -------------------------------
 function hidePopup(popup) {
     if (!popup.classList.contains('hidden')) {
         popup.classList.add('hidden');
-        popup.addEventListener('transitionend', () => {
-            popup.style = 'display: none';
-        });
+        if (popup.classList.contains('show')) {
+            popup.classList.remove('show');
+        }
     }
 }
 
+// ---------------------------------
+// Функция, показывающая попап popup
+// ---------------------------------
 function showPopup(popup) {
-    console.log(getComputedStyle(popup).display, popup);
-    if (popup.classList.contains('hidden') || getComputedStyle(popup).display === 'none') {
+    if (popup.classList.contains('hidden') ) {
         popup.classList.remove('hidden');
-        //popup.classList.add('show');
-        /* popup.addEventListener('transitionend', () => {
-            popup.style = 'display: initial';
-        }); */
+        if (!popup.classList.contains('show')) {
+            popup.classList.add('show');
+        }
     }
 }
 
@@ -271,7 +391,7 @@ let me = null; // я
 let users = [];
 let webSocket = null; // вебсокет
 
-const fragmentMessage = new DocumentFragment(); // фрагмент 
+const fragmentContainer = new DocumentFragment(); // фрагмент 
 
 let messageFromServer = {}; // сообщение от сервера
 
@@ -283,7 +403,7 @@ function workServer() {
     webSocket = new WebSocket(PATH_WS_SERVER);
     
     // соединение установлено
-    webSocket.onopen = event => {
+    webSocket.onopen = () => {
         console.info(`[open] Соединение установлено`);
         webSocket.send(JSON.stringify(me.setMessageData(USER_INFO_TYPE, '')));
         hidePopup(authPopup);
@@ -302,7 +422,6 @@ function workServer() {
                 renderUser(messageFromServer, users);
                 break;
             default:
-                
                 break;
         }
     };
@@ -322,10 +441,14 @@ function workServer() {
     };
 }
 
+ // -----------
  // авторизация
-const authPopup = document.querySelector('#auth'); // форма авторизации
+ // -----------
+const authPopup = document.querySelector('#auth'); // попап авторизации
 const authorizationForm = document.forms.authorizationForm; // форма авторизации
 const authorizationButton = authorizationForm.authorizationButton;
+
+showPopup(authPopup);
 
 authorizationButton.addEventListener('click', event => {
     event.preventDefault();
@@ -334,16 +457,21 @@ authorizationButton.addEventListener('click', event => {
     workServer(); // соединяемся и работаем с вебсокет-сервером
 });
 
+
+// ----------------
 // поиск участников
+// ----------------
 const findInput = document.querySelector('#findInput');
 findInput.addEventListener('keyup', event => {
     renderFindedUsers(findInput.value);
 });
 
+// --------------
 // смена аватарки
+// --------------
 const menuButton = document.querySelector('#menuButton');
 
 menuButton.addEventListener('click', event => {
     event.preventDefault();
     renderOptionsPopup();
-})
+});

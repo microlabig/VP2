@@ -94,7 +94,7 @@ server.on('connection', ws => {
             name: 'Node.JS Server',
             nickName: 'WebSocket',
             avatar: './images/nodejs-logo.png',
-            text: 'Добро пожаловать!',
+            text: 'Добро пожаловать в чат!',
             date: new Date()
         }
     }));
@@ -131,8 +131,10 @@ function sendAllUsers() {
 /* //-------------------------------
 //-------------------------------
 console.info(`
-    Добро пожаловать на мой сервер
+    Добро пожаловать на сервер
     Путь: ws://localhost:${PORT}
+
+    <CTRL> + <C> для выхода
 `);
 //-------------------------------
 //------------------------------- */

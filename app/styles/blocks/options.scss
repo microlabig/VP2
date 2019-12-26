@@ -1,21 +1,19 @@
 .options {
-    z-index: 1;
-    opacity: 1;
-    visibility: visible;
-    overflow: visible;
-    
     transition: $delay;
 
     &.hidden {
+        z-index: 0;
         opacity: 0;
         visibility: hidden;
         overflow: hidden;
     }
-    /* &.show {
+
+    &.show {
+        z-index: 1;
         opacity: 1;
         visibility: visible;
         overflow: visible
-    } */
+    }
 
     & .container{
         position: absolute;
