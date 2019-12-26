@@ -19,7 +19,6 @@ class User {
         this.nickName = nickName;
         this.avatar = DEFAULT_AVATAR_SRC;
         this.text = '';
-        this.avatarsContainer = [];
     }
 
     /* getFullName() {
@@ -151,29 +150,30 @@ function isUserExist(user) {
 /******************************************************************************
  *                                  V I E W
  *****************************************************************************/
-function pushAvatarInContainer(user) {
-    // поиск пользователя в users
-    // если нашли 
-    // TODO:
+function pushAvatarElementInContainer(userNickName, element) {
+    avatarContainers.set(userNickName, element);
 }
 // ----------------------------
 // Функция рендеринга сообщения
 // ----------------------------
 function renderMessage(message, options = {}) {
-    const chatList = document.getElementById('chatList'); // контейнер сообщений
+    const chatList = document.querySelector('#chatList'); // контейнер сообщений
     const messageTemplate = document.querySelector('#message').textContent; // шаблон сообщения
     const render = Handlebars.compile(messageTemplate); // создадим функцию-рендер html-содержимого
 
     let hidden = false;
+
+    const imageElement = chatList.querySelector('.messages__icon'); // елемент для добавления в контейнер аватарок пользователя
+
     if (options.type && options.type === 'me') {
         hidden = getValueHiddenClass(chatList, true);
         fragmentContainer.innerHTML = render(getDataMessage(message, {me: true, hidden: hidden}));
-        // pushAvatarInContainer(me);
+        pushAvatarElementInContainer(me.nickName, imageElement);
     } else {
         hidden = getValueHiddenClass(chatList, false);
         fragmentContainer.innerHTML = render(getDataMessage(message, {me: false, hidden: hidden}));
+        pushAvatarElementInContainer(message.users.nickName, imageElement);
     }
-    
     chatList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
 }
 
@@ -198,6 +198,9 @@ function renderUser(message) {
     users.forEach( user => {
         fragmentContainer.innerHTML = render(getDataUser(user));
         memberList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
+
+        const imageElement = memberList.lastElementChild.querySelector('.members__icon'); // найдем последний элемент в списке
+        pushAvatarElementInContainer(user.nickName, imageElement);
     });
 
     renderQuantityUsers(users);
@@ -279,7 +282,7 @@ function workWithLoadPhotoPopup(optionsPopup) {
 
     const applyButton = loadPhotoPopup.querySelector('.apply');
     const dragContainer = loadPhotoPopup.querySelector('#dragContainer');
-    const loadPhotoImage = loadPhotoPopup.querySelector('.loadphoto__image')
+    //const loadPhotoImage = loadPhotoPopup.querySelector('.loadphoto__image');
 
     loadPhotoPopup.addEventListener('click', event => {
         const target = event.target;
@@ -297,9 +300,11 @@ function workWithLoadPhotoPopup(optionsPopup) {
     dragContainer.addEventListener('dragover', event => {
         event.preventDefault();
     });
+    
     dragContainer.addEventListener('dragleave', event => {
         event.preventDefault();
     });
+
     dragContainer.addEventListener('drop', event => {
         event.preventDefault();
         uploadFile();
@@ -310,7 +315,7 @@ function workWithLoadPhotoPopup(optionsPopup) {
         const loadphotoIcon = loadPhotoPopup.querySelector('.loadphoto__icon');
         me.avatar = loadphotoIcon.src; // сохраняем base64 url в аватар пользователя
         hidePopup(loadPhotoPopup);
-        repaintAllAvatars();
+        repaintAllAvatarsOfUser(me, me.avatar);
     });
 }
 
@@ -355,8 +360,13 @@ function changeFile(event, isDragged = false) {
     return file;
 }
 
-function repaintAllAvatars() {
-
+function repaintAllAvatarsOfUser(user, src) {
+    for (const nickName of avatarContainers.keys()) {
+        if (nickName === user.nickName) {
+            const element = avatarContainers.get(nickName);
+            element.src = src;
+        }
+    }
 }
 
 // -------------------------------
@@ -389,6 +399,7 @@ function showPopup(popup) {
 
 let me = null; // я
 let users = [];
+let avatarContainers = new Map();
 let webSocket = null; // вебсокет
 
 const fragmentContainer = new DocumentFragment(); // фрагмент 
