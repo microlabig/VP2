@@ -75,7 +75,12 @@
     margin: 0 auto;
 
     transition: background-color $delay;
+    
     &:hover {
         background-color: $bg-button-hover-color;
+    }
+
+    &:disabled {
+        background-color: $bg-input-color;
     }
 }

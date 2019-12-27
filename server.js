@@ -67,15 +67,17 @@ server.on('connection', ws => {
                 if (!clients.getClient(nickName)) { // нет такого пользователя с ником в текущем списке клиентов
                     clients.saveClient(nickName, user); // сохранить клиента
                 }
+                // TODO: отправить пользователю все сообщения из логов сообщений
                 sendAllUsers();
                 break;
 
             case 'userSaveAvatar':
-                clients.saveClientAvatar(nickName, msgObject.path);
+                clients.saveClientAvatar(nickName, msgObject.avatar);
                 sendAllUsers();
                 break;
         
             default:
+                // TODO: вести логи входящих сообщений
                 sendMessage(message);
                 break;
         }
@@ -90,13 +92,11 @@ server.on('connection', ws => {
     // приветствие
     ws.send(JSON.stringify({
         type: 'userText',
-        users: {
-            name: 'Node.JS Server',
-            nickName: 'WebSocket',
-            avatar: './images/nodejs-logo.png',
-            text: 'Добро пожаловать в чат!',
-            date: new Date()
-        }
+        name: 'Node.JS Server',
+        nickName: 'WebSocket',
+        avatar: './images/nodejs-logo.png',
+        text: 'Добро пожаловать в чат!',
+        date: new Date()
     }));
 });
 
@@ -106,7 +106,7 @@ server.on('connection', ws => {
 function sendMessage(message) {
     server.clients.forEach( client => {
         if (client.readyState === webSocket.OPEN) {
-            client.send(message);
+            client.send(message); // TODO: составить тип сообщения
         }
     });
 }

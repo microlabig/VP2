@@ -1,24 +1,28 @@
 /******************************************************************************
  *                               M O D E L
  *****************************************************************************/
-const PATH_WS_SERVER        = 'ws://localhost:3030';
+const PATH_WS_SERVER        = 'ws://localhost:3030'; // адрес вебсокет-сервера
 
-const TEXT_TYPE             = 'userText';
-const USER_INFO_TYPE        = 'userInfo';
-const USER_SAVE_AVATAR_TYPE = 'userSaveAvatar';
-const GET_ALL_USERS_TYPE    = 'getAllUsers';
+const TEXT_TYPE             = 'userText'; // тип сообщения - текст
+const USER_INFO_TYPE        = 'userInfo'; // тип сообщения - инфо о пользователе
+const USER_SAVE_AVATAR_TYPE = 'userSaveAvatar'; // тип сообщения - сохранение аватара пользователя
+const GET_ALL_USERS_TYPE    = 'getAllUsers'; // тип сообщения - список и настройки пользователей
 
-const DEFAULT_AVATAR_SRC    = './images/photo_no-image.png';
+const DEFAULT_AVATAR_SRC    = './images/photo_no-image.png'; // аватар по-умолчанию
+
+const ENTER_KEY             = 13; // код клавиши <ENTER>
 
 // ------------------
 // Класс пользователя
 // ------------------
 class User {
+    // конструктор
     constructor(name, nickName) {
         this.name = name;
         this.nickName = nickName;
         this.avatar = DEFAULT_AVATAR_SRC;
         this.text = '';
+        this.avatarsContainer = []; // контейнер для хранения элементов-изображений пользователя
     }
 
     /* getFullName() {
@@ -26,15 +30,28 @@ class User {
         return `${nameArr[0]} ${this.nickName} ${nameArr[1]}`;
     } */
 
-    setMessageData(type, text) {
+    // метод, упаковывающий данные пользователя для последующей отправки на сервер
+    getMessageData(type, textMessage) {
         return {
             name: this.name,
             nickName: this.nickName,
             avatar: this.avatar,
             date: new Date(),
             type: type,
-            text: text
+            text: textMessage
         }
+    }
+
+    // метод, копирующий параметры свойства аватара
+    copyAvatar(user) {
+        this.avatar = user.avatar;
+    }
+
+    // метод, перерисовывающий все присутствующие на странице изображения аватара пользователя
+    repaintAllAvatars(src) {
+        this.avatarsContainer.forEach( avatar => {
+            avatar.src = src;
+        });
     }
 }
 
@@ -80,6 +97,9 @@ function dateToTime(date) {
 // ------------------------------------------------------------------------
 function getValueHiddenClass(ulList, isMyMessage) {
     const liList = ulList.querySelectorAll('li'); // найдем все сообщения из списка сообщений
+    //console.log(liList);
+    //console.log(users);
+    
     
     if (liList) { // если сообщения есть
         const lastLi = liList[liList.length - 1]; // проверим последнее сообщение
@@ -104,18 +124,18 @@ function getDataMessage(message, options = {me: false, hidden: false}) {
     // me - сообщение собственное (me=true) или чужое (me=false) 
     // hidden - скрыть аватар в сообщении или нет
     return { 
-            text: message.users.text,
-            name: message.users.name,
-            date: dateToTime(message.users.date),
-            path: message.users.avatar,
+            text: message.text,
+            name: message.name,
+            date: dateToTime(message.date),
+            path: message.avatar,
             me: options.me ? 'me' : '',
             hidden: options.hidden ? 'hidden' : ''
         }
 }
 
-// ---------------------------------------------------------------------
-// Функция проверяет - встречается ли подстрока chunk в строке full
-// ---------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// Функция проверяет - встречается ли подстрока chunk в строке full без учета регистра
+// -----------------------------------------------------------------------------------
 function isMatching(full, chunk) {
     let fullStr = full.toLowerCase(),
         chunkStr = chunk.toLowerCase();
@@ -140,19 +160,39 @@ function getDataUser(user) {
 // -----------------------------------------------------------------------------------------
 function isUserExist(user) {
     for (let userComparing of users) {
-        if (user.nickName === userComparing.nickName) {
+        if (userComparing.nickName === user.nickName) {
             return true;
         }
     }
     return false;
 }
 
+// ---------------------------------------------------------------------
+// Функция поиска пользователя по нику и возвращающя его в случае успеха
+// ---------------------------------------------------------------------
+function findUser(nickName) {
+    for (const user in users) {
+        if (user.nickName === nickName) {
+            return user;
+        }
+    }
+}
+
 /******************************************************************************
  *                                  V I E W
  *****************************************************************************/
+// -------------------------------------------------------------------------------------
+// Функция добавления элемента-изображения в контейнер пользователя с ником userNickName
+// -------------------------------------------------------------------------------------
 function pushAvatarElementInContainer(userNickName, element) {
-    avatarContainers.set(userNickName, element);
+    for (const user of users) {
+        if (user.nickName === userNickName) {
+            //debugger;
+            user.avatarsContainer.push(element);
+        }
+    }
 }
+
 // ----------------------------
 // Функция рендеринга сообщения
 // ----------------------------
@@ -161,48 +201,71 @@ function renderMessage(message, options = {}) {
     const messageTemplate = document.querySelector('#message').textContent; // шаблон сообщения
     const render = Handlebars.compile(messageTemplate); // создадим функцию-рендер html-содержимого
 
-    let hidden = false;
+    let hidden = false; // признак скрытия аватарки пользователя
 
-    const imageElement = chatList.querySelector('.messages__icon'); // елемент для добавления в контейнер аватарок пользователя
-
-    if (options.type && options.type === 'me') {
-        hidden = getValueHiddenClass(chatList, true);
+    if (options.type && options.type === 'me') { // если собственное сообщение
+        hidden = getValueHiddenClass(chatList, true); // определить - стоит ли скрывать аватар в зависимости от последнего сообщения
         fragmentContainer.innerHTML = render(getDataMessage(message, {me: true, hidden: hidden}));
-        pushAvatarElementInContainer(me.nickName, imageElement);
     } else {
-        hidden = getValueHiddenClass(chatList, false);
+        hidden = getValueHiddenClass(chatList, false); // определить - стоит ли скрывать аватар в зависимости от последнего сообщения
         fragmentContainer.innerHTML = render(getDataMessage(message, {me: false, hidden: hidden}));
-        pushAvatarElementInContainer(message.users.nickName, imageElement);
     }
-    chatList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
+
+    chatList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML); 
+
+    if (chatList.children.length !== 0) {
+        const imageElement = chatList.lastElementChild.querySelector('.messages__icon'); // елемент для добавления в контейнер аватарок пользователя
+        pushAvatarElementInContainer(message.nickName, imageElement); // запомнить элемент-изображения в контейнере изображений аватара пользователя
+    }
 }
 
 // ---------------------------------------
 // Функция рендеринга списка пользователей
 // ---------------------------------------
-function renderUser(message) {
+function renderUsers(message) {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
     const userTemplate = document.querySelector('#members').textContent; // шаблон пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
 
-    for (const user in message.users) {
-        const currUser = message.users[user]
-        if (!isUserExist(currUser)) {
-            const newUser = new User(currUser.name, currUser.nickName) ;
-            users.push(newUser);
-        }
-    }
+    //users = refreshUsers(oldUsersAvatars);
+    //refreshUsers(oldUsersAvatars);
 
+    // переберем всех пользователей в принятом сообщении от сервера
+    /* for (const userNickName in message.users) {
+        const currUser = message.users[userNickName]; // возьмем текущего пользователя (по нику)
+
+        if (me.nickName === userNickName) { // если я уже регистрировался в чате ранее
+            me.copyAvatar(currUser); // скопировать аватар, пришедший от сервера
+        } 
+        if (!isUserExist(currUser)) { // если текущий пользователь не найден в списке пользователей
+            const newUser = new User(currUser.name, currUser.nickName); // создадим пользователя
+
+            if (usersAvatarsContainer.has(currUser.nickName)) {
+                newUser.avatarsContainer = [...usersAvatarsContainer.get(currUser.nickName)];
+            }
+            users.push(newUser); // и добавим в список пользователей
+        }
+    } */
+
+    // сбросим список пользователей в чате
     memberList.innerHTML = '';
 
-    users.forEach( user => {
+    // переберем список пользователей и этрендерим аватары
+    users.forEach( user => { 
+        if (user.nickName === me.nickName) { 
+            user.avatar = me.avatar;
+        } 
+
         fragmentContainer.innerHTML = render(getDataUser(user));
         memberList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
 
+        // запомним элемент-изображение в контейнер аватарок пользователя
         const imageElement = memberList.lastElementChild.querySelector('.members__icon'); // найдем последний элемент в списке
         pushAvatarElementInContainer(user.nickName, imageElement);
     });
+    //console.log('-|-',users);
 
+    // отрисуем количество пользователей в чате
     renderQuantityUsers(users);
 }
 
@@ -214,6 +277,7 @@ function renderFindedUsers(str) {
     const userTemplate = document.querySelector('#members').textContent; // шаблон искомого пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
 
+    // найдем пользователя с ником или фио, соответствующих строке str
     const findedUsers = users.filter( user => isMatching(user.name, str) || isMatching(user.nickName, str));
 
     // сбросим список пользователей в чате
@@ -242,7 +306,7 @@ function renderQuantityUsers() {
 // Функция рендеринга попапа настроек
 // ----------------------------------
 function renderOptionsPopup() {
-    const optionsPopup = document.getElementById('options');
+    const optionsPopup = document.getElementById('options'); // попап опций
     const optionsWrapper = document.getElementById('options__wrapper'); // контейнер
     const optionsPhotoTemplate = document.querySelector('#optionsPhoto').textContent; 
     const render = Handlebars.compile(optionsPhotoTemplate); // создадим функцию-рендер html-содержимого
@@ -251,81 +315,95 @@ function renderOptionsPopup() {
         const target = event.target;
 
         event.preventDefault();
-        if (target.classList.contains('options__close') || 
-            target.classList.contains('options__button') ||
-            target.classList.contains('container')) {
-            hidePopup(optionsPopup);
+
+        if (target.classList.contains('options__close') || // кнопка закрытия опций
+            target.classList.contains('options__button') || 
+            target.classList.contains('container')) { // контейнер по периметру попапа
+            hidePopup(optionsPopup); // скрыть опции
         }
-        if (target.classList.contains('options__left') || 
-            target.classList.contains('options__avatar') ||
+
+        if (target.classList.contains('options__left') || // кнопка выбора аватара пользователя
+            target.classList.contains('options__avatar') || // аватар пользователя
             target.classList.contains('fas'))  {
-            workWithLoadPhotoPopup(optionsPopup);
+                hidePopup(optionsPopup); // скрыть опции
+                workWithLoadPhotoPopup(); // перейти к работе с аватаром пользователя
         }
     });
 
     optionsWrapper.innerHTML = render({name: me.name, avatar: me.avatar});
     
-    showPopup(optionsPopup);
+    showPopup(optionsPopup); // показать опции
 }
 
-
-function workWithLoadPhotoPopup(optionsPopup) {
-    const loadPhotoPopup = document.querySelector('#loadhoto');
+// ------------------------------------------------------
+// Функция работы с попапом загрузки аватара пользователя
+// ------------------------------------------------------
+function workWithLoadPhotoPopup() {
+    const loadPhotoPopup = document.querySelector('#loadhoto'); // попап загрузки аватара
     const loadPhotoImageContainer = document.getElementById('loadPhotoImage'); // контейнер
     const loadPhotoIconTemplate = document.querySelector('#loadPhotoIcon').textContent; 
     const render = Handlebars.compile(loadPhotoIconTemplate); // создадим функцию-рендер html-содержимого
 
     loadPhotoImageContainer.innerHTML = render({path: me.avatar});
     
-    hidePopup(optionsPopup);
-    showPopup(loadPhotoPopup);
+    showPopup(loadPhotoPopup); // показать попап работы с загрузкой аватара пользователя
 
-    const applyButton = loadPhotoPopup.querySelector('.apply');
-    const dragContainer = loadPhotoPopup.querySelector('#dragContainer');
-    //const loadPhotoImage = loadPhotoPopup.querySelector('.loadphoto__image');
+    const applyButton = loadPhotoPopup.querySelector('.apply'); // кнопка сохранения аватара
+    const dragContainer = loadPhotoPopup.querySelector('#dragContainer'); // контейнер для drag&drop изображения
 
     loadPhotoPopup.addEventListener('click', event => {
         const target = event.target;
-        if (target.classList.contains('cancel') ||
-            target.classList.contains('container')) {
-                hidePopup(loadPhotoPopup);   
+        if (target.classList.contains('cancel') || // кнопка отмены
+            target.classList.contains('container')) { // контейнер по периметру попапа
+                hidePopup(loadPhotoPopup); // скрыть попап
             }
     });
 
+    // обработчик работы с файлом изображении при открытии диалогового окна с файловой системой
     dragContainer.addEventListener('change', event => {
-        event.preventDefault();
-        uploadFile();
+        event.preventDefault(); 
+        uploadFile(); // загрузить изображение
     });
 
+    // обработчик dragover
     dragContainer.addEventListener('dragover', event => {
         event.preventDefault();
     });
     
+    // обработчик dragleave - перемещаемое изображение не над контейнером
     dragContainer.addEventListener('dragleave', event => {
         event.preventDefault();
     });
 
+    // обработчик сброса изображения на контейнере drag&drop
     dragContainer.addEventListener('drop', event => {
         event.preventDefault();
-        uploadFile();
+        uploadFile(); // загрузить изображение
     });
 
+    // обработчик применения настроек
     applyButton.addEventListener('click', event => {
+        const loadphotoIcon = loadPhotoPopup.querySelector('.loadphoto__icon'); // найдем изображение аватара в попапе
+
         event.preventDefault();
-        const loadphotoIcon = loadPhotoPopup.querySelector('.loadphoto__icon');
         me.avatar = loadphotoIcon.src; // сохраняем base64 url в аватар пользователя
-        hidePopup(loadPhotoPopup);
-        repaintAllAvatarsOfUser(me, me.avatar);
+        hidePopup(loadPhotoPopup); // скрыть попап
+        me.repaintAllAvatars(me.avatar); // перерисуем собственные аватарки
+        webSocket.send(JSON.stringify(me.getMessageData(USER_SAVE_AVATAR_TYPE, ''))); // отправим сообщение на сервер о смене аватарки
     });
 }
 
+// ----------------------------------------------------
+// Функция загрузки файла и преобразование его в base64
+// ----------------------------------------------------
 function uploadFile() {
     const file = changeFile(event); // получим файл изображения
 
-    if (file) {
+    if (file) { // если файл соотвествует необходимым критериям (см. ф-ию changeFile)
         const reader = new FileReader(); // создадим экземпляр чтения файла
 
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(file); // прочитать файл как URL (преобразовать в base64)
+        // загрузка (преобразование) завершено
         reader.onloadend = () => {
             const loadphotoIcon = document.querySelector('.loadphoto__icon');
             loadphotoIcon.src = reader.result; // сохраняем в base64 url
@@ -333,17 +411,20 @@ function uploadFile() {
     }
 }
 
-function changeFile(event, isDragged = false) {
+// ------------------------------
+// Функция проверки файла аватара 
+// ------------------------------
+function changeFile(event) {
     let file = null;
     
     try {
-        file = event.target.files[0];
+        file = event.target.files[0]; // если файл получен из диалогового окна
     } catch (error) {
-        file = event.dataTransfer.files[0];
+        file = event.dataTransfer.files[0]; // если файл получен методом drag&drop
     }
     
     if (file) {
-        // проверим тип файла
+        // проверим тип файла, должен быть JPEG
         if (file.type !== "image/jpeg") {
             alert("Можно загружать только JPG-файлы");
 
@@ -358,15 +439,6 @@ function changeFile(event, isDragged = false) {
     }
 
     return file;
-}
-
-function repaintAllAvatarsOfUser(user, src) {
-    for (const nickName of avatarContainers.keys()) {
-        if (nickName === user.nickName) {
-            const element = avatarContainers.get(nickName);
-            element.src = src;
-        }
-    }
 }
 
 // -------------------------------
@@ -393,13 +465,64 @@ function showPopup(popup) {
     }
 }
 
+function refreshUsersArray(message) {
+    const tempArr = [];
+
+    for (const user in message.users) {
+        const nickName = message.users[user].nickName;
+        let currUser = users.find( usr => usr.nickName === nickName);
+
+        if (currUser) {
+            usersAvatarsContainer.set(nickName, currUser.avatarsContainer || []);
+            tempArr.push(currUser);
+        } else {
+            // переберем всех пользователей в принятом сообщении от сервера
+            currUser = message.users[nickName]; // возьмем текущего пользователя (по нику)
+
+            const newUser = new User(currUser.name, currUser.nickName); // создадим пользователя
+
+            if (me.nickName === nickName) { // если я уже регистрировался в чате ранее
+                me.copyAvatar(currUser); // скопировать аватар, пришедший от сервера
+            } 
+
+            if (usersAvatarsContainer.has(currUser.nickName)) {
+                newUser.avatarsContainer = [...usersAvatarsContainer.get(currUser.nickName)];
+            }
+
+            tempArr.push(newUser); // и добавим в список пользователей
+        }
+    }
+    // обнулим массив пользователей
+    users.length = 0; 
+    // скопируем обновленную информацию о текущих пользователях
+    users = [...tempArr];
+    
+    // переместим себя в начало списка
+    let indexMe = -1;
+    const userMeItem = users.find( (user, index) => {
+        indexMe = index;
+        return (user.nickName === me.nickName);
+    });
+    users.splice(indexMe, 1);
+    users.unshift(userMeItem);
+    
+    // возвратим старые значения контейнера аватарок пользователям в списке
+    for (const user of users) {
+        const container = usersAvatarsContainer.get(user.nickName);
+
+        if (container) {
+            user.avatarsContainer = [...container];
+        } 
+    }
+}
+
 /******************************************************************************
  *                          C O N T R O L L E R
  *****************************************************************************/
 
 let me = null; // я
-let users = [];
-let avatarContainers = new Map();
+let users = []; // список всех пользователей чата
+let usersAvatarsContainer = new Map(); // карта соответствия контейнеров элементов-изображений по нику пользователя
 let webSocket = null; // вебсокет
 
 const fragmentContainer = new DocumentFragment(); // фрагмент 
@@ -416,22 +539,46 @@ function workServer() {
     // соединение установлено
     webSocket.onopen = () => {
         console.info(`[open] Соединение установлено`);
-        webSocket.send(JSON.stringify(me.setMessageData(USER_INFO_TYPE, '')));
+        webSocket.send(JSON.stringify(me.getMessageData(USER_INFO_TYPE, '')));
         hidePopup(authPopup);
     };
     
     // получены данные от сервера
     webSocket.onmessage = event => {
-        console.info('[message]', event.data);
+        //console.info('[message]', event.data);
+        
+        // преобразуем входящее сообщение в объект
         messageFromServer = {...JSON.parse(event.data)};
+
+        // обработаем тип сообщения от сервера в зависимости от типа
         switch (messageFromServer.type) {
+            // тип - текст
             case TEXT_TYPE:
-                renderMessage(messageFromServer);
+                if (messageFromServer.nickName === me.nickName) {
+                    renderMessage(messageFromServer, {type: 'me'}); // отрендерить собственное сообщение в чате
+                } else {
+                    renderMessage(messageFromServer); // отрендерить сообщение в чате
+                }
                 break;
+            // тип - все пользователи
             case GET_ALL_USERS_TYPE:
-                users = [];
-                renderUser(messageFromServer, users);
+
+                refreshUsersArray(messageFromServer);
+
+                renderUsers(messageFromServer); // отрендерить список пользователей
+                
+                // отрендерить все аватарки пользователя
+                for (const user of users) {
+                    const avatarMessages = messageFromServer.users[user.nickName].avatar;
+                    user.avatar = avatarMessages;
+                    user.repaintAllAvatars(user.avatar);
+                }
+
                 break;
+                
+            /* case USER_SAVE_AVATAR_TYPE: 
+                repaintAllAvatarsOfUser(messageFromServer.nickName, messageFromServer.avatar);
+                break; */
             default:
                 break;
         }
@@ -459,6 +606,7 @@ const authPopup = document.querySelector('#auth'); // попап авториз�
 const authorizationForm = document.forms.authorizationForm; // форма авторизации
 const authorizationButton = authorizationForm.authorizationButton;
 
+// показать логин-попап
 showPopup(authPopup);
 
 authorizationButton.addEventListener('click', event => {
@@ -468,7 +616,6 @@ authorizationButton.addEventListener('click', event => {
     workServer(); // соединяемся и работаем с вебсокет-сервером
 });
 
-
 // ----------------
 // поиск участников
 // ----------------
@@ -477,12 +624,52 @@ findInput.addEventListener('keyup', event => {
     renderFindedUsers(findInput.value);
 });
 
-// --------------
-// смена аватарки
-// --------------
+// --------------------------
+// смена собственной аватарки
+// --------------------------
 const menuButton = document.querySelector('#menuButton');
 
 menuButton.addEventListener('click', event => {
     event.preventDefault();
     renderOptionsPopup();
 });
+
+// отправка сообщения в чат
+const chatForm = document.forms.chatForm;
+const chatInput = chatForm.chatInput;
+const chatButton = chatForm.chatButton;
+
+let isEmptyMessage = true;
+
+chatInput.addEventListener('keyup', event => {
+    const value = chatInput.value;
+
+    if (value.length === 0) {
+        isEmptyMessage = true;
+        chatButton.setAttribute('disabled','disabled');
+    } else {
+        isEmptyMessage = false;
+        chatButton.removeAttribute('disabled');
+    }
+});
+
+chatInput.addEventListener('keydown', event => {
+    if (event.keyCode === ENTER_KEY) {
+        event.preventDefault();
+        if (!isEmptyMessage) {
+            const value = chatInput.value;
+            sendMessage(value);
+        }
+    }
+})
+
+chatButton.addEventListener('click', event => {
+    const value = chatInput.value;
+    sendMessage(value);
+});
+
+function sendMessage(text) {
+    webSocket.send(JSON.stringify(me.getMessageData(TEXT_TYPE, text)));
+    chatInput.value = '';
+    chatButton.setAttribute('disabled','disabled');
+}
