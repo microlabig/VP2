@@ -33,6 +33,11 @@ input {
     background-color: transparent;
     outline: none;
     border: 0;
+
+    &:-internal-autofill-selected { // когда выбрал из автозаполнения
+        color: initial;
+        background-color: initial;
+    }
 }
 
 button {

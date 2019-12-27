@@ -48,6 +48,17 @@
     margin-bottom: 13px;
 }
 
+.loadphoto__image-container {
+    &.draggable {
+        .loadphoto__image {
+            background-color: rgba($bg-button-color, .4);
+        }
+        .loadphoto__dots {
+            animation: BgColorAnimation $delay infinite alternate;
+        }
+    }
+}
+
 .loadphoto__input {
     display: none;
     visibility: hidden;
@@ -60,18 +71,12 @@
     position: relative;
     width: 285px;
     height: 285px;
-    
-    border: 0px solid red;
 
     background-color: $bg-element-color;
     
     margin: 0 auto;
 
     transition: $delay;
-
-    &.dragged {
-        border: 1px solid red;
-    }
 }
 
 .loadphoto__icon {
@@ -101,6 +106,8 @@
     transform: translate(-50%, -50%);
 
     background-color: rgba($text-color, .3);
+
+    animation: none;
 
     &:nth-child(2) {
         cursor: sw-resize;

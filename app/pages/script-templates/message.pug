@@ -4,4 +4,6 @@ script(type="text/x-pug-template")#message
             +image("messages","{{path}}")
         .messages__message
             .messages__text {{text}}
-            .messages__data {{date}}
+            .messages__info
+                span.messages__nick {{nickName}}: 
+                span.messages__data {{date}}

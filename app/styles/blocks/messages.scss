@@ -80,14 +80,16 @@
 .messages__message {
     position: relative;
     display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    //flex-basis: 40%;
-
+    // flex-wrap: nowrap;
+    // align-items: center;
+    flex-direction: column;
+    // flex-basis: 40%;
+    
     background-color: $bg-message-color;
     border-radius: $border-radius-button;
-
+    
     width: fit-content;
+    max-width: 45%;
 
     padding: 12px 17px;
 
@@ -108,15 +110,7 @@
     }
 }
 
-.messages__text {
-    margin-right: 15px;
-}
-
-.messages__data {
+.messages__info {
     align-self: flex-end;
     color: rgba($text-color, .4);
-    
-    position: relative;
-    top: 10px;
-    left: 10px;
 }

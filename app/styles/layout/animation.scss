@@ -1,0 +1,9 @@
+@keyframes BgColorAnimation {
+    from {
+        background-color: rgba($text-color, .3);
+    }
+
+    to {
+        background-color: rgba($text-color, .7);
+    }
+}

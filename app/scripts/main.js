@@ -2,6 +2,7 @@
  *                               M O D E L
  *****************************************************************************/
 const PATH_WS_SERVER        = 'ws://localhost:3030'; // адрес вебсокет-сервера
+const SERVER_NICK_NAME      = 'WebSocket';
 
 const TEXT_TYPE             = 'userText'; // тип сообщения - текст
 const USER_INFO_TYPE        = 'userInfo'; // тип сообщения - инфо о пользователе
@@ -97,9 +98,6 @@ function dateToTime(date) {
 // ------------------------------------------------------------------------
 function getValueHiddenClass(ulList, isMyMessage) {
     const liList = ulList.querySelectorAll('li'); // найдем все сообщения из списка сообщений
-    //console.log(liList);
-    //console.log(users);
-    
     
     if (liList) { // если сообщения есть
         const lastLi = liList[liList.length - 1]; // проверим последнее сообщение
@@ -123,9 +121,11 @@ function getValueHiddenClass(ulList, isMyMessage) {
 function getDataMessage(message, options = {me: false, hidden: false}) { 
     // me - сообщение собственное (me=true) или чужое (me=false) 
     // hidden - скрыть аватар в сообщении или нет
+    
     return { 
             text: message.text,
             name: message.name,
+            nickName: message.nickName === SERVER_NICK_NAME ? 'Сервер' : message.nickName,
             date: dateToTime(message.date),
             path: message.avatar,
             me: options.me ? 'me' : '',
@@ -226,26 +226,6 @@ function renderUsers(message) {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
     const userTemplate = document.querySelector('#members').textContent; // шаблон пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
-
-    //users = refreshUsers(oldUsersAvatars);
-    //refreshUsers(oldUsersAvatars);
-
-    // переберем всех пользователей в принятом сообщении от сервера
-    /* for (const userNickName in message.users) {
-        const currUser = message.users[userNickName]; // возьмем текущего пользователя (по нику)
-
-        if (me.nickName === userNickName) { // если я уже регистрировался в чате ранее
-            me.copyAvatar(currUser); // скопировать аватар, пришедший от сервера
-        } 
-        if (!isUserExist(currUser)) { // если текущий пользователь не найден в списке пользователей
-            const newUser = new User(currUser.name, currUser.nickName); // создадим пользователя
-
-            if (usersAvatarsContainer.has(currUser.nickName)) {
-                newUser.avatarsContainer = [...usersAvatarsContainer.get(currUser.nickName)];
-            }
-            users.push(newUser); // и добавим в список пользователей
-        }
-    } */
 
     // сбросим список пользователей в чате
     memberList.innerHTML = '';
@@ -364,20 +344,30 @@ function workWithLoadPhotoPopup() {
         event.preventDefault(); 
         uploadFile(); // загрузить изображение
     });
-
+    
+    // DRAG & DROP
     // обработчик dragover
     dragContainer.addEventListener('dragover', event => {
+        if (!dragContainer.classList.contains('draggable')) {
+            dragContainer.classList.add('draggable');
+        }
         event.preventDefault();
     });
     
     // обработчик dragleave - перемещаемое изображение не над контейнером
     dragContainer.addEventListener('dragleave', event => {
         event.preventDefault();
+        if (dragContainer.classList.contains('draggable')) {
+            dragContainer.classList.remove('draggable');
+        }
     });
 
     // обработчик сброса изображения на контейнере drag&drop
     dragContainer.addEventListener('drop', event => {
         event.preventDefault();
+        if (dragContainer.classList.contains('draggable')) {
+            dragContainer.classList.remove('draggable');
+        }
         uploadFile(); // загрузить изображение
     });
 
