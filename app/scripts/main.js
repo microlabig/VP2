@@ -1,18 +1,18 @@
-/******************************************************************************
+/* *****************************************************************************
  *                               M O D E L
  *****************************************************************************/
-const PATH_WS_SERVER        = 'ws://localhost:3030'; // адрес вебсокет-сервера
-const SERVER_NICK_NAME      = 'WebSocket';
+const PATH_WS_SERVER = 'ws://localhost:3030'; // адрес вебсокет-сервера
+const SERVER_NICK_NAME = 'WebSocket';
 
-const TEXT_TYPE             = 'userText'; // тип сообщения - текст
-const USER_INFO_TYPE        = 'userInfo'; // тип сообщения - инфо о пользователе
+const TEXT_TYPE = 'userText'; // тип сообщения - текст
+const USER_INFO_TYPE = 'userInfo'; // тип сообщения - инфо о пользователе
 const USER_SAVE_AVATAR_TYPE = 'userSaveAvatar'; // тип сообщения - сохранение аватара пользователя
-const GET_ALL_USERS_TYPE    = 'getAllUsers'; // тип сообщения - список и настройки пользователей
-const GET_ALL_MESSAGE_TYPE  = 'getAllMessages'; // тип сообщения - все сообщения
+const GET_ALL_USERS_TYPE = 'getAllUsers'; // тип сообщения - список и настройки пользователей
+const GET_ALL_MESSAGE_TYPE = 'getAllMessages'; // тип сообщения - все сообщения
 
-const DEFAULT_AVATAR_SRC    = './images/photo_no-image.png'; // аватар по-умолчанию
+const DEFAULT_AVATAR_SRC = './images/photo_no-image.png'; // аватар по-умолчанию
 
-const ENTER_KEY             = 13; // код клавиши <ENTER>
+const ENTER_KEY = 13; // код клавиши <ENTER>
 
 // ------------------
 // Класс пользователя
@@ -26,11 +26,6 @@ class User {
         this.text = '';
         this.avatarsContainer = []; // контейнер для хранения элементов-изображений пользователя
     }
-
-    /* getFullName() {
-        //const nameArr = this.name.split(' ');
-        return `${nameArr[0]} ${this.nickName} ${nameArr[1]}`;
-    } */
 
     // метод, упаковывающий данные пользователя для последующей отправки на сервер
     getMessageData(type, textMessage) {
@@ -51,7 +46,7 @@ class User {
 
     // метод, перерисовывающий все присутствующие на странице изображения аватара пользователя
     repaintAllAvatars(src) {
-        this.avatarsContainer.forEach( avatar => {
+        this.avatarsContainer.forEach(avatar => {
             avatar.src = src;
         });
     }
@@ -64,7 +59,7 @@ class User {
 function getEnding(length) {
     const rest = length % 10;
     let dozen = Math.floor(length / 10);
-    
+
     while (dozen > 10) {
         dozen = Math.floor(dozen / 10);
     }
@@ -85,8 +80,8 @@ function getEnding(length) {
 // ---------------------------------------------------
 function dateToTime(date) {
     const currDate = new Date(Date.parse(date));
-    let hours = currDate.getHours() 
-    let minutes = currDate.getMinutes(); 
+    let hours = currDate.getHours()
+    let minutes = currDate.getMinutes();
 
     hours = (hours < 10) ? ('0' + hours) : ('' + hours);
     minutes = (minutes < 10) ? ('0' + minutes) : ('' + minutes);
@@ -116,30 +111,139 @@ function getDataUser(user) {
     }
 }
 
-// -----------------------------------------------------------------------------------------
-// Функция, проверяющая существование ранее добавленного пользователя в списке пользователей
-// -----------------------------------------------------------------------------------------
-/* function isUserExist(user) {
-    for (let userComparing of users) {
-        if (userComparing.nickName === user.nickName) {
-            return true;
+// -----------------------------------------------
+// Функция отправки текстового сообщения на сервер
+// -----------------------------------------------
+function sendMessage(text) {
+    webSocket.send(JSON.stringify(me.getMessageData(TEXT_TYPE, text))); // отправить сообщение
+    chatInput.value = ''; // обнулить инпут чата
+    chatButton.setAttribute('disabled', 'disabled'); // задисаблить кнопку отправки сообщения
+}
+
+// -----------------------------------------------------------------
+// Функция, возвращающая специальный объект для рендеринга сообщения
+// -----------------------------------------------------------------
+function getDataMessage(message, options = { me: false, hidden: false }) {
+    // me - сообщение собственное (me=true) или чужое (me=false) 
+    // hidden - скрыть аватар в сообщении или нет
+
+    return {
+        text: message.text,
+        name: message.name,
+        nickName: message.nickName === SERVER_NICK_NAME ? 'Сервер' : message.nickName,
+        date: dateToTime(message.date),
+        path: message.avatar,
+        me: options.me ? 'me' : '',
+        hidden: options.hidden ? 'hidden' : ''
+    }
+}
+
+// ----------------------------------------------------------
+// Функция обновления информации о списке пользователей
+// и добавляющая контейнеры изображений этим же пользователям
+// ----------------------------------------------------------
+function refreshUsersArray(message) {
+    const tempArr = [];
+
+    for (const user in message.users) {
+        const nickName = message.users[user].nickName;
+        let currUser = users.find(usr => usr.nickName === nickName);
+
+        if (currUser) {
+            usersAvatarsContainer.set(nickName, currUser.avatarsContainer || []);
+            tempArr.push(currUser);
+        } else {
+            currUser = message.users[nickName]; // возьмем текущего пользователя (по нику)
+
+            const newUser = new User(currUser.name, currUser.nickName); // создадим пользователя
+
+            if (me.nickName === nickName) { // если я уже регистрировался в чате ранее
+                me.copyAvatar(currUser); // скопировать аватар, пришедший от сервера
+            }
+
+            if (usersAvatarsContainer.has(currUser.nickName)) {
+                newUser.avatarsContainer = [...usersAvatarsContainer.get(currUser.nickName)];
+            }
+
+            tempArr.push(newUser); // и добавим в список пользователей
         }
     }
-    return false;
-} */
+    // обнулим массив пользователей
+    users.length = 0;
+    // скопируем обновленную информацию о текущих пользователях
+    users = [...tempArr];
 
-// ---------------------------------------------------------------------
-// Функция поиска пользователя по нику и возвращающя его в случае успеха
-// ---------------------------------------------------------------------
-/* function findUser(nickName) {
-    for (const user in users) {
-        if (user.nickName === nickName) {
-            return user;
+    // переместим себя в начало списка
+    let indexMe = -1;
+    const userMeItem = users.find((user, index) => {
+        indexMe = index;
+
+        return (user.nickName === me.nickName);
+    });
+
+    users.splice(indexMe, 1);
+    users.unshift(userMeItem);
+
+    // возвратим старые значения контейнера аватарок пользователям в списке
+    for (const user of users) {
+        const container = usersAvatarsContainer.get(user.nickName);
+
+        if (container) {
+            user.avatarsContainer = [...container];
         }
     }
-} */
+}
 
-/******************************************************************************
+// ----------------------------------------------------
+// Функция загрузки файла и преобразование его в base64
+// ----------------------------------------------------
+function uploadFile() {
+    const file = changeFile(event); // получим файл изображения
+
+    if (file) { // если файл соотвествует необходимым критериям (см. ф-ию changeFile)
+        const reader = new FileReader(); // создадим экземпляр чтения файла
+
+        reader.readAsDataURL(file); // прочитать файл как URL (преобразовать в base64)
+        // загрузка (преобразование) завершено
+        reader.onload = () => {
+            const loadphotoIcon = document.querySelector('.loadphoto__icon');
+
+            loadphotoIcon.src = reader.result; // сохраняем в base64 url
+        }
+    }
+}
+
+// -------------------------------------------
+// Функция проверки загружаемого файла аватара 
+// -------------------------------------------
+function changeFile(event) {
+    let file = null;
+
+    try {
+        file = event.target.files[0]; // если файл получен из диалогового окна
+    } catch (error) {
+        file = event.dataTransfer.files[0]; // если файл получен методом drag&drop
+    }
+
+    if (file) {
+        // проверим тип файла, должен быть JPEG
+        if (file.type !== 'image/jpeg') {
+            alert('Можно загружать только JPG-файлы');
+
+            return;
+        }
+        // если файл больше 512 Кб
+        if (file.size / 1024 > 512) {
+            alert('Для загрузки используйте файлы изображений менее 512 Кб');
+
+            return;
+        }
+    }
+
+    return file;
+}
+
+/* *****************************************************************************
  *                                  V I E W
  *****************************************************************************/
 // -------------------------------------------------------------------------------------
@@ -151,24 +255,6 @@ function pushAvatarElementInContainer(userNickName, element) {
             user.avatarsContainer.push(element);
         }
     }
-}
-
-// -----------------------------------------------------------------
-// Функция, возвращающая специальный объект для рендеринга сообщения
-// -----------------------------------------------------------------
-function getDataMessage(message, options = {me: false, hidden: false}) { 
-    // me - сообщение собственное (me=true) или чужое (me=false) 
-    // hidden - скрыть аватар в сообщении или нет
-    
-    return { 
-            text: message.text,
-            name: message.name,
-            nickName: message.nickName === SERVER_NICK_NAME ? 'Сервер' : message.nickName,
-            date: dateToTime(message.date),
-            path: message.avatar,
-            me: options.me ? 'me' : '',
-            hidden: options.hidden ? 'hidden' : ''
-        }
 }
 
 // ------------------------------------------------------------------------
@@ -201,18 +287,19 @@ function renderMessage(message) {
     let hidden = false; // признак скрытия аватарки пользователя
 
     hidden = getValueHiddenClass(chatList, message.nickName); // определить - стоит ли скрывать аватар в зависимости от последнего сообщения
- 
-    fragmentContainer.innerHTML = render(getDataMessage(message, 
+
+    fragmentContainer.innerHTML = render(getDataMessage(message,
         {
-            me: (message.nickName === me.nickName) ? 'me' : '', 
+            me: (message.nickName === me.nickName) ? 'me' : '',
             hidden: hidden
         }
     ));
 
-    chatList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML); 
+    chatList.insertAdjacentHTML('beforeend', fragmentContainer.innerHTML);
 
     if (chatList.children.length !== 0) {
         const imageElement = chatList.lastElementChild.querySelector('.messages__icon'); // елемент для добавления в контейнер аватарок пользователя
+        
         pushAvatarElementInContainer(message.nickName, imageElement); // запомнить элемент-изображения в контейнере изображений аватара пользователя
     }
 }
@@ -220,7 +307,7 @@ function renderMessage(message) {
 // ---------------------------------------
 // Функция рендеринга списка пользователей
 // ---------------------------------------
-function renderUsers(message) {
+function renderUsers() {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
     const userTemplate = document.querySelector('#members').textContent; // шаблон пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
@@ -229,16 +316,17 @@ function renderUsers(message) {
     memberList.innerHTML = '';
 
     // переберем список пользователей и этрендерим аватары
-    users.forEach( user => { 
-        if (user.nickName === me.nickName) { 
+    users.forEach(user => {
+        if (user.nickName === me.nickName) {
             user.avatar = me.avatar;
-        } 
+        }
 
         fragmentContainer.innerHTML = render(getDataUser(user));
-        memberList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
+        memberList.insertAdjacentHTML('beforeend', fragmentContainer.innerHTML);
 
         // запомним элемент-изображение в контейнер аватарок пользователя
         const imageElement = memberList.lastElementChild.querySelector('.members__icon'); // найдем последний элемент в списке
+        
         pushAvatarElementInContainer(user.nickName, imageElement);
     });
 
@@ -255,15 +343,15 @@ function renderFindedUsers(str) {
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
 
     // найдем пользователя с ником или фио, соответствующих строке str
-    const findedUsers = users.filter( user => isMatching(user.name, str) || isMatching(user.nickName, str));
+    const findedUsers = users.filter(user => isMatching(user.name, str) || isMatching(user.nickName, str));
 
     // сбросим список пользователей в чате
     memberList.innerHTML = '';
 
     // добавим найденных пользователей в список
-    findedUsers.forEach( user => {
+    findedUsers.forEach(user => {
         fragmentContainer.innerHTML = render(getDataUser(user));
-        memberList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML);
+        memberList.insertAdjacentHTML('beforeend', fragmentContainer.innerHTML);
     });
 }
 
@@ -275,7 +363,7 @@ function renderQuantityUsers() {
     const qMembers = document.querySelector('#qmembers').textContent; // шаблон 
     const render = Handlebars.compile(qMembers); // создадим функцию-рендер html-содержимого
 
-    fragmentContainer.innerHTML = render({usersQuantity: users.length, ending: getEnding(users.length)});
+    fragmentContainer.innerHTML = render({ usersQuantity: users.length, ending: getEnding(users.length) });
     usersQuantity.innerHTML = fragmentContainer.innerHTML;
 }
 
@@ -285,7 +373,7 @@ function renderQuantityUsers() {
 function renderOptionsPopup() {
     const optionsPopup = document.getElementById('options'); // попап опций
     const optionsWrapper = document.getElementById('options__wrapper'); // контейнер
-    const optionsPhotoTemplate = document.querySelector('#optionsPhoto').textContent; 
+    const optionsPhotoTemplate = document.querySelector('#optionsPhoto').textContent;
     const render = Handlebars.compile(optionsPhotoTemplate); // создадим функцию-рендер html-содержимого
 
     optionsPopup.addEventListener('click', event => {
@@ -294,21 +382,21 @@ function renderOptionsPopup() {
         event.preventDefault();
 
         if (target.classList.contains('options__close') || // кнопка закрытия опций
-            target.classList.contains('options__button') || 
+            target.classList.contains('options__button') ||
             target.classList.contains('container')) { // контейнер по периметру попапа
             hidePopup(optionsPopup); // скрыть опции
         }
 
         if (target.classList.contains('options__left') || // кнопка выбора аватара пользователя
             target.classList.contains('options__avatar') || // аватар пользователя
-            target.classList.contains('fas'))  {
-                hidePopup(optionsPopup); // скрыть опции
-                workWithLoadPhotoPopup(); // перейти к работе с аватаром пользователя
+            target.classList.contains('fas')) {
+            hidePopup(optionsPopup); // скрыть опции
+            workWithLoadPhotoPopup(); // перейти к работе с аватаром пользователя
         }
     });
 
-    optionsWrapper.innerHTML = render({name: me.name, avatar: me.avatar});
-    
+    optionsWrapper.innerHTML = render({ name: me.name, avatar: me.avatar });
+
     showPopup(optionsPopup); // показать опции
 }
 
@@ -318,11 +406,11 @@ function renderOptionsPopup() {
 function workWithLoadPhotoPopup() {
     const loadPhotoPopup = document.querySelector('#loadhoto'); // попап загрузки аватара
     const loadPhotoImageContainer = document.getElementById('loadPhotoImage'); // контейнер
-    const loadPhotoIconTemplate = document.querySelector('#loadPhotoIcon').textContent; 
+    const loadPhotoIconTemplate = document.querySelector('#loadPhotoIcon').textContent;
     const render = Handlebars.compile(loadPhotoIconTemplate); // создадим функцию-рендер html-содержимого
 
-    loadPhotoImageContainer.innerHTML = render({path: me.avatar});
-    
+    loadPhotoImageContainer.innerHTML = render({ path: me.avatar });
+
     showPopup(loadPhotoPopup); // показать попап работы с загрузкой аватара пользователя
 
     const applyButton = loadPhotoPopup.querySelector('.apply'); // кнопка сохранения аватара
@@ -330,18 +418,19 @@ function workWithLoadPhotoPopup() {
 
     loadPhotoPopup.addEventListener('click', event => {
         const target = event.target;
+
         if (target.classList.contains('cancel') || // кнопка отмены
             target.classList.contains('container')) { // контейнер по периметру попапа
-                hidePopup(loadPhotoPopup); // скрыть попап
-            }
+            hidePopup(loadPhotoPopup); // скрыть попап
+        }
     });
 
     // обработчик работы с файлом изображении при открытии диалогового окна с файловой системой
     dragContainer.addEventListener('change', event => {
-        event.preventDefault(); 
+        event.preventDefault();
         uploadFile(); // загрузить изображение
     });
-    
+
     // DRAG & DROP
     // обработчик dragover
     dragContainer.addEventListener('dragover', event => {
@@ -350,7 +439,7 @@ function workWithLoadPhotoPopup() {
         }
         event.preventDefault();
     });
-    
+
     // обработчик dragleave - перемещаемое изображение не над контейнером
     dragContainer.addEventListener('dragleave', event => {
         event.preventDefault();
@@ -380,54 +469,6 @@ function workWithLoadPhotoPopup() {
     });
 }
 
-// ----------------------------------------------------
-// Функция загрузки файла и преобразование его в base64
-// ----------------------------------------------------
-function uploadFile() {
-    const file = changeFile(event); // получим файл изображения
-
-    if (file) { // если файл соотвествует необходимым критериям (см. ф-ию changeFile)
-        const reader = new FileReader(); // создадим экземпляр чтения файла
-
-        reader.readAsDataURL(file); // прочитать файл как URL (преобразовать в base64)
-        // загрузка (преобразование) завершено
-        reader.onload = () => {
-            const loadphotoIcon = document.querySelector('.loadphoto__icon');
-            loadphotoIcon.src = reader.result; // сохраняем в base64 url
-        }
-    }
-}
-
-// ------------------------------
-// Функция проверки файла аватара 
-// ------------------------------
-function changeFile(event) {
-    let file = null;
-    
-    try {
-        file = event.target.files[0]; // если файл получен из диалогового окна
-    } catch (error) {
-        file = event.dataTransfer.files[0]; // если файл получен методом drag&drop
-    }
-    
-    if (file) {
-        // проверим тип файла, должен быть JPEG
-        if (file.type !== "image/jpeg") {
-            alert("Можно загружать только JPG-файлы");
-
-            return;
-        }
-        // если файл больше 512 Кб
-        if (file.size / 1024 > 512) {
-            alert("Для загрузки используйте файлы изображений менее 512 Кб");
-            
-            return;
-        }
-    }
-
-    return file;
-}
-
 // -------------------------------
 // Функция, скрывающая попап popup
 // -------------------------------
@@ -444,7 +485,7 @@ function hidePopup(popup) {
 // Функция, показывающая попап popup
 // ---------------------------------
 function showPopup(popup) {
-    if (popup.classList.contains('hidden') ) {
+    if (popup.classList.contains('hidden')) {
         popup.classList.remove('hidden');
         if (!popup.classList.contains('show')) {
             popup.classList.add('show');
@@ -452,67 +493,17 @@ function showPopup(popup) {
     }
 }
 
-function refreshUsersArray(message) {
-    const tempArr = [];
-
-    for (const user in message.users) {
-        const nickName = message.users[user].nickName;
-        let currUser = users.find( usr => usr.nickName === nickName);
-
-        if (currUser) {
-            usersAvatarsContainer.set(nickName, currUser.avatarsContainer || []);
-            tempArr.push(currUser);
-        } else {
-            currUser = message.users[nickName]; // возьмем текущего пользователя (по нику)
-
-            const newUser = new User(currUser.name, currUser.nickName); // создадим пользователя
-
-            if (me.nickName === nickName) { // если я уже регистрировался в чате ранее
-                me.copyAvatar(currUser); // скопировать аватар, пришедший от сервера
-            } 
-
-            if (usersAvatarsContainer.has(currUser.nickName)) {
-                newUser.avatarsContainer = [...usersAvatarsContainer.get(currUser.nickName)];
-            }
-
-            tempArr.push(newUser); // и добавим в список пользователей
-        }
-    }
-    // обнулим массив пользователей
-    users.length = 0; 
-    // скопируем обновленную информацию о текущих пользователях
-    users = [...tempArr];
-    
-    // переместим себя в начало списка
-    let indexMe = -1;
-    const userMeItem = users.find( (user, index) => {
-        indexMe = index;
-        return (user.nickName === me.nickName);
-    });
-    users.splice(indexMe, 1);
-    users.unshift(userMeItem);
-    
-    // возвратим старые значения контейнера аватарок пользователям в списке
-    for (const user of users) {
-        const container = usersAvatarsContainer.get(user.nickName);
-
-        if (container) {
-            user.avatarsContainer = [...container];
-        } 
-    }
-}
-
 // -------------------------------------------------------------------
 // Функция рендеринга аватарок на всех элементах картинок пользователя
 // -------------------------------------------------------------------
-function renderAllAvatars(message) {
+function renderAllAvatars() {
     for (const user of users) {
         user.avatar = messageFromServer.users[user.nickName].avatar;
         user.repaintAllAvatars(user.avatar);
     }
 }
 
-/******************************************************************************
+/* *****************************************************************************
  *                          C O N T R O L L E R
  *****************************************************************************/
 
@@ -531,21 +522,21 @@ let messageFromServer = {}; // сообщение от сервера
 function workServer() {
     // создание соединения с вебсокет-сервером
     webSocket = new WebSocket(PATH_WS_SERVER);
-    
+
     // соединение установлено
     webSocket.onopen = () => {
-        console.info(`[open] Соединение установлено`);
+        console.info('[open] Соединение установлено');
         webSocket.send(JSON.stringify(me.getMessageData(USER_INFO_TYPE, ''))); // отправить данные о пользователе на сервер
         hidePopup(authPopup); // скрыть форму авторизации
         document.forms.chatForm.chatInput.focus(); // установить фокус на инпуте чата
     };
-    
+
     // получены данные от сервера
     webSocket.onmessage = event => {
         console.info('[message]', event.data);
-        
+
         // преобразуем входящее сообщение в объект
-        messageFromServer = {...JSON.parse(event.data)};
+        messageFromServer = { ...JSON.parse(event.data) };
 
         // обработаем тип сообщения от сервера в зависимости от типа
         switch (messageFromServer.type) {
@@ -560,20 +551,20 @@ function workServer() {
                 // обновить список текущих пользователей
                 refreshUsersArray(messageFromServer);
                 // отрисовать пользователей и их количество
-                renderUsers(messageFromServer);
+                renderUsers();
                 // отрендерить все аватарки пользователя
                 renderAllAvatars(messageFromServer);
                 break;
-            
+
             // тип - все сообщения
-            case GET_ALL_MESSAGE_TYPE: 
+            case GET_ALL_MESSAGE_TYPE:
                 // обновить список текущих пользователей
                 refreshUsersArray(messageFromServer);
                 // отрендерить все сообщения
                 for (const message of messageFromServer.logs) {
                     renderMessage(message);
                 }
-            break;
+                break;
 
             default:
                 break;
@@ -590,14 +581,14 @@ function workServer() {
         if (event.wasClean) {
             console.info(`[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`);
         } else {
-            console.info(`[close] Соединение прервано`);
+            console.info('[close] Соединение прервано');
         }
     };
 }
 
- // -----------
- // авторизация
- // -----------
+// -----------
+// авторизация
+// -----------
 const authPopup = document.querySelector('#auth'); // попап авторизации
 const authorizationForm = document.forms.authorizationForm; // форма авторизации
 const authorizationButton = authorizationForm.authorizationButton;
@@ -620,7 +611,7 @@ authorizationButton.addEventListener('click', event => {
             nickNameUserInput.classList.add('error');
         }
     } else { // введены все данные
-        authorizationButton.setAttribute('disabled','disabled');
+        authorizationButton.setAttribute('disabled', 'disabled');
         me = new User(authorizationForm.nameUser.value, authorizationForm.nickNameUser.value);
         users.push(me); // добавить пользователя в список всех присутствующих пользвателей чата
         workServer(); // соединяемся и работаем с вебсокет-сервером
@@ -631,7 +622,8 @@ authorizationButton.addEventListener('click', event => {
 // поиск участников
 // ----------------
 const findInput = document.querySelector('#findInput');
-findInput.addEventListener('keyup', event => {
+
+findInput.addEventListener('keyup', () => {
     renderFindedUsers(findInput.value);
 });
 
@@ -655,12 +647,12 @@ const chatButton = chatForm.chatButton; // кнопка отправки соо�
 let isEmptyMessage = true; // проверка на наличия сообщения в инпуте чата
 
 // валидация по ввденным данным в инпуте чата
-chatInput.addEventListener('keyup', event => {
+chatInput.addEventListener('keyup', () => {
     const value = chatInput.value;
-    
+
     if (value.length === 0) {
         isEmptyMessage = true;
-        chatButton.setAttribute('disabled','disabled');
+        chatButton.setAttribute('disabled', 'disabled');
     } else {
         isEmptyMessage = false;
         chatButton.removeAttribute('disabled');
@@ -673,22 +665,15 @@ chatInput.addEventListener('keydown', event => {
         event.preventDefault();
         if (!isEmptyMessage) {
             const value = chatInput.value;
+
             sendMessage(value);
         }
     }
-})
+});
 
 // отправка сообщения на сервер
 chatButton.addEventListener('click', () => {
     const value = chatInput.value;
+    
     sendMessage(value);
 });
-
-// -----------------------------------------------
-// Функция отправки текстового сообщения на сервер
-// -----------------------------------------------
-function sendMessage(text) {
-    webSocket.send(JSON.stringify(me.getMessageData(TEXT_TYPE, text))); // отправить сообщение
-    chatInput.value = ''; // обнулить инпут чата
-    chatButton.setAttribute('disabled','disabled'); // задисаблить кнопку отправки сообщения
-}

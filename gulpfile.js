@@ -58,7 +58,7 @@ task('styles', () => {
             rem: 16,            // root element (html) font-size (default: 16)
             one: false          // whether convert 1px to rem (default: false)
         }))
-        .pipe(gulpif(env === 'dev', autoprefixer({ cascade: false })))
+        .pipe(gulpif(env === 'build', autoprefixer({ cascade: false })))
         .pipe(gulpif(env === 'build', gcmq()))
         .pipe(gulpif(env === 'build', cleanCSS()))
         .pipe(gulpif(env === 'dev', sourcemaps.write()))
@@ -156,11 +156,10 @@ task("copy:fonts", () => {
 task('server', () => {
     browserSync.init({
         server: {
-            baseDir: `./${DIST_PATH}`,
-            // ghostMode: false,
-            // codeSync: false
+            baseDir: `./${DIST_PATH}`
         },
-        open: false
+        open: false,
+        ghostMode: false // для отключения синхронизации в случае открытия нескольких окон
     });
 });
 
