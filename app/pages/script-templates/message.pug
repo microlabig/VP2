@@ -1,5 +1,5 @@
 script(type="text/x-pug-template")#message
-    li(class="messages__item {{me}} {{hidden}}")
+    li(class="messages__item {{me}} {{hidden}}" data-nickname="{{nickName}}")
         .messages__avatar
             +image("messages","{{path}}")
         .messages__message

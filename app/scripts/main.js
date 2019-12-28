@@ -8,6 +8,7 @@ const TEXT_TYPE             = 'userText'; // тип сообщения - тек�
 const USER_INFO_TYPE        = 'userInfo'; // тип сообщения - инфо о пользователе
 const USER_SAVE_AVATAR_TYPE = 'userSaveAvatar'; // тип сообщения - сохранение аватара пользователя
 const GET_ALL_USERS_TYPE    = 'getAllUsers'; // тип сообщения - список и настройки пользователей
+const GET_ALL_MESSAGE_TYPE  = 'getAllMessages'; // тип сообщения - все сообщения
 
 const DEFAULT_AVATAR_SRC    = './images/photo_no-image.png'; // аватар по-умолчанию
 
@@ -93,46 +94,6 @@ function dateToTime(date) {
     return `${hours}:${minutes}`;
 }
 
-// ------------------------------------------------------------------------
-// Функция возвращающая результат проверки типа последнего сообщения в чате
-// ------------------------------------------------------------------------
-function getValueHiddenClass(ulList, isMyMessage) {
-    const liList = ulList.querySelectorAll('li'); // найдем все сообщения из списка сообщений
-    
-    if (liList) { // если сообщения есть
-        const lastLi = liList[liList.length - 1]; // проверим последнее сообщение
-        if (isMyMessage) { // если текущее сообщение - мое
-            if (lastLi && lastLi.classList.contains('me')) { // если последнее сообщение в чате - мое (содержит класс 'me')
-                return true; // скрывать аватар у схожих последующих сообщений
-            }
-        } else { // если текущее сообщение от другого пользователя
-            if (lastLi && !lastLi.classList.contains('me')) { // если последнее сообщение в чате не мое
-                return true; // также скрывать аватар у схожих последующих сообщений
-            }
-        }
-    }
-
-    return false;
-}
-
-// -----------------------------------------------------------------
-// Функция, возвращающая специальный объект для рендеринга сообщения
-// -----------------------------------------------------------------
-function getDataMessage(message, options = {me: false, hidden: false}) { 
-    // me - сообщение собственное (me=true) или чужое (me=false) 
-    // hidden - скрыть аватар в сообщении или нет
-    
-    return { 
-            text: message.text,
-            name: message.name,
-            nickName: message.nickName === SERVER_NICK_NAME ? 'Сервер' : message.nickName,
-            date: dateToTime(message.date),
-            path: message.avatar,
-            me: options.me ? 'me' : '',
-            hidden: options.hidden ? 'hidden' : ''
-        }
-}
-
 // -----------------------------------------------------------------------------------
 // Функция проверяет - встречается ли подстрока chunk в строке full без учета регистра
 // -----------------------------------------------------------------------------------
@@ -158,25 +119,25 @@ function getDataUser(user) {
 // -----------------------------------------------------------------------------------------
 // Функция, проверяющая существование ранее добавленного пользователя в списке пользователей
 // -----------------------------------------------------------------------------------------
-function isUserExist(user) {
+/* function isUserExist(user) {
     for (let userComparing of users) {
         if (userComparing.nickName === user.nickName) {
             return true;
         }
     }
     return false;
-}
+} */
 
 // ---------------------------------------------------------------------
 // Функция поиска пользователя по нику и возвращающя его в случае успеха
 // ---------------------------------------------------------------------
-function findUser(nickName) {
+/* function findUser(nickName) {
     for (const user in users) {
         if (user.nickName === nickName) {
             return user;
         }
     }
-}
+} */
 
 /******************************************************************************
  *                                  V I E W
@@ -187,29 +148,66 @@ function findUser(nickName) {
 function pushAvatarElementInContainer(userNickName, element) {
     for (const user of users) {
         if (user.nickName === userNickName) {
-            //debugger;
             user.avatarsContainer.push(element);
         }
     }
 }
 
+// -----------------------------------------------------------------
+// Функция, возвращающая специальный объект для рендеринга сообщения
+// -----------------------------------------------------------------
+function getDataMessage(message, options = {me: false, hidden: false}) { 
+    // me - сообщение собственное (me=true) или чужое (me=false) 
+    // hidden - скрыть аватар в сообщении или нет
+    
+    return { 
+            text: message.text,
+            name: message.name,
+            nickName: message.nickName === SERVER_NICK_NAME ? 'Сервер' : message.nickName,
+            date: dateToTime(message.date),
+            path: message.avatar,
+            me: options.me ? 'me' : '',
+            hidden: options.hidden ? 'hidden' : ''
+        }
+}
+
+// ------------------------------------------------------------------------
+// Функция возвращающая результат проверки типа последнего сообщения в чате
+// ------------------------------------------------------------------------
+function getValueHiddenClass(ulList, nickName) {
+    const liList = ulList.querySelectorAll('li'); // найдем все сообщения из списка сообщений
+
+    if (liList.length !== 0) {
+        const lastMessage = liList[liList.length - 1];
+        const dataNick = lastMessage.dataset.nickname;
+
+        if (dataNick === nickName) {
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
 // ----------------------------
 // Функция рендеринга сообщения
 // ----------------------------
-function renderMessage(message, options = {}) {
+function renderMessage(message) {
     const chatList = document.querySelector('#chatList'); // контейнер сообщений
     const messageTemplate = document.querySelector('#message').textContent; // шаблон сообщения
     const render = Handlebars.compile(messageTemplate); // создадим функцию-рендер html-содержимого
 
     let hidden = false; // признак скрытия аватарки пользователя
 
-    if (options.type && options.type === 'me') { // если собственное сообщение
-        hidden = getValueHiddenClass(chatList, true); // определить - стоит ли скрывать аватар в зависимости от последнего сообщения
-        fragmentContainer.innerHTML = render(getDataMessage(message, {me: true, hidden: hidden}));
-    } else {
-        hidden = getValueHiddenClass(chatList, false); // определить - стоит ли скрывать аватар в зависимости от последнего сообщения
-        fragmentContainer.innerHTML = render(getDataMessage(message, {me: false, hidden: hidden}));
-    }
+    hidden = getValueHiddenClass(chatList, message.nickName); // определить - стоит ли скрывать аватар в зависимости от последнего сообщения
+ 
+    fragmentContainer.innerHTML = render(getDataMessage(message, 
+        {
+            me: (message.nickName === me.nickName) ? 'me' : '', 
+            hidden: hidden
+        }
+    ));
 
     chatList.insertAdjacentHTML("beforeend", fragmentContainer.innerHTML); 
 
@@ -243,7 +241,6 @@ function renderUsers(message) {
         const imageElement = memberList.lastElementChild.querySelector('.members__icon'); // найдем последний элемент в списке
         pushAvatarElementInContainer(user.nickName, imageElement);
     });
-    //console.log('-|-',users);
 
     // отрисуем количество пользователей в чате
     renderQuantityUsers(users);
@@ -394,7 +391,7 @@ function uploadFile() {
 
         reader.readAsDataURL(file); // прочитать файл как URL (преобразовать в base64)
         // загрузка (преобразование) завершено
-        reader.onloadend = () => {
+        reader.onload = () => {
             const loadphotoIcon = document.querySelector('.loadphoto__icon');
             loadphotoIcon.src = reader.result; // сохраняем в base64 url
         }
@@ -466,7 +463,6 @@ function refreshUsersArray(message) {
             usersAvatarsContainer.set(nickName, currUser.avatarsContainer || []);
             tempArr.push(currUser);
         } else {
-            // переберем всех пользователей в принятом сообщении от сервера
             currUser = message.users[nickName]; // возьмем текущего пользователя (по нику)
 
             const newUser = new User(currUser.name, currUser.nickName); // создадим пользователя
@@ -506,6 +502,16 @@ function refreshUsersArray(message) {
     }
 }
 
+// -------------------------------------------------------------------
+// Функция рендеринга аватарок на всех элементах картинок пользователя
+// -------------------------------------------------------------------
+function renderAllAvatars(message) {
+    for (const user of users) {
+        user.avatar = messageFromServer.users[user.nickName].avatar;
+        user.repaintAllAvatars(user.avatar);
+    }
+}
+
 /******************************************************************************
  *                          C O N T R O L L E R
  *****************************************************************************/
@@ -529,46 +535,46 @@ function workServer() {
     // соединение установлено
     webSocket.onopen = () => {
         console.info(`[open] Соединение установлено`);
-        webSocket.send(JSON.stringify(me.getMessageData(USER_INFO_TYPE, '')));
-        hidePopup(authPopup);
+        webSocket.send(JSON.stringify(me.getMessageData(USER_INFO_TYPE, ''))); // отправить данные о пользователе на сервер
+        hidePopup(authPopup); // скрыть форму авторизации
+        document.forms.chatForm.chatInput.focus(); // установить фокус на инпуте чата
     };
     
     // получены данные от сервера
     webSocket.onmessage = event => {
-        //console.info('[message]', event.data);
+        console.info('[message]', event.data);
         
         // преобразуем входящее сообщение в объект
         messageFromServer = {...JSON.parse(event.data)};
 
         // обработаем тип сообщения от сервера в зависимости от типа
         switch (messageFromServer.type) {
+
             // тип - текст
             case TEXT_TYPE:
-                if (messageFromServer.nickName === me.nickName) {
-                    renderMessage(messageFromServer, {type: 'me'}); // отрендерить собственное сообщение в чате
-                } else {
-                    renderMessage(messageFromServer); // отрендерить сообщение в чате
-                }
+                renderMessage(messageFromServer);
                 break;
+
             // тип - все пользователи
             case GET_ALL_USERS_TYPE:
-
+                // обновить список текущих пользователей
                 refreshUsersArray(messageFromServer);
-
-                renderUsers(messageFromServer); // отрендерить список пользователей
-                
+                // отрисовать пользователей и их количество
+                renderUsers(messageFromServer);
                 // отрендерить все аватарки пользователя
-                for (const user of users) {
-                    const avatarMessages = messageFromServer.users[user.nickName].avatar;
-                    user.avatar = avatarMessages;
-                    user.repaintAllAvatars(user.avatar);
-                }
-
+                renderAllAvatars(messageFromServer);
                 break;
-                
-            /* case USER_SAVE_AVATAR_TYPE: 
-                repaintAllAvatarsOfUser(messageFromServer.nickName, messageFromServer.avatar);
-                break; */
+            
+            // тип - все сообщения
+            case GET_ALL_MESSAGE_TYPE: 
+                // обновить список текущих пользователей
+                refreshUsersArray(messageFromServer);
+                // отрендерить все сообщения
+                for (const message of messageFromServer.logs) {
+                    renderMessage(message);
+                }
+            break;
+
             default:
                 break;
         }
@@ -600,10 +606,25 @@ const authorizationButton = authorizationForm.authorizationButton;
 showPopup(authPopup);
 
 authorizationButton.addEventListener('click', event => {
+    const nameUserInput = authorizationForm.nameUser;
+    const nickNameUserInput = authorizationForm.nickNameUser;
+
     event.preventDefault();
-    me = new User(authorizationForm.nameUser.value, authorizationForm.nickNameUser.value);
-    users.push(me); // добавить пользователя в список всех присутствующих пользвателей чата
-    workServer(); // соединяемся и работаем с вебсокет-сервером
+
+    // простая валидация
+    if (nameUserInput.value.length === 0 || nickNameUserInput.value.length === 0) { // нет имени или ника
+        if (!nameUserInput.classList.contains('error')) {
+            nameUserInput.classList.add('error');
+        }
+        if (!nickNameUserInput.classList.contains('error')) {
+            nickNameUserInput.classList.add('error');
+        }
+    } else { // введены все данные
+        authorizationButton.setAttribute('disabled','disabled');
+        me = new User(authorizationForm.nameUser.value, authorizationForm.nickNameUser.value);
+        users.push(me); // добавить пользователя в список всех присутствующих пользвателей чата
+        workServer(); // соединяемся и работаем с вебсокет-сервером
+    }
 });
 
 // ----------------
@@ -624,16 +645,19 @@ menuButton.addEventListener('click', event => {
     renderOptionsPopup();
 });
 
+// --------------------------
 // отправка сообщения в чат
-const chatForm = document.forms.chatForm;
-const chatInput = chatForm.chatInput;
-const chatButton = chatForm.chatButton;
+// --------------------------
+const chatForm = document.forms.chatForm; // форма чата
+const chatInput = chatForm.chatInput; // инпут чата
+const chatButton = chatForm.chatButton; // кнопка отправки сообщения чата
 
-let isEmptyMessage = true;
+let isEmptyMessage = true; // проверка на наличия сообщения в инпуте чата
 
+// валидация по ввденным данным в инпуте чата
 chatInput.addEventListener('keyup', event => {
     const value = chatInput.value;
-
+    
     if (value.length === 0) {
         isEmptyMessage = true;
         chatButton.setAttribute('disabled','disabled');
@@ -643,6 +667,7 @@ chatInput.addEventListener('keyup', event => {
     }
 });
 
+// отправка сообщения по нажатию клавиши Enter
 chatInput.addEventListener('keydown', event => {
     if (event.keyCode === ENTER_KEY) {
         event.preventDefault();
@@ -653,13 +678,17 @@ chatInput.addEventListener('keydown', event => {
     }
 })
 
-chatButton.addEventListener('click', event => {
+// отправка сообщения на сервер
+chatButton.addEventListener('click', () => {
     const value = chatInput.value;
     sendMessage(value);
 });
 
+// -----------------------------------------------
+// Функция отправки текстового сообщения на сервер
+// -----------------------------------------------
 function sendMessage(text) {
-    webSocket.send(JSON.stringify(me.getMessageData(TEXT_TYPE, text)));
-    chatInput.value = '';
-    chatButton.setAttribute('disabled','disabled');
+    webSocket.send(JSON.stringify(me.getMessageData(TEXT_TYPE, text))); // отправить сообщение
+    chatInput.value = ''; // обнулить инпут чата
+    chatButton.setAttribute('disabled','disabled'); // задисаблить кнопку отправки сообщения
 }

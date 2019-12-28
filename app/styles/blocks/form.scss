@@ -55,8 +55,16 @@
     
     padding: 15px 10px;
 
+    transition: $delay;
+
     &::placeholder {
         color: $text-placeholder-color;
+    }
+
+    &.error {
+        &::placeholder {
+            color: $error-color;
+        }
     }
 }
 

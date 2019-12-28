@@ -1,5 +1,16 @@
-const PORT = 3030; // порт 3030
-const DEFAULT_AVATAR_SRC    = './images/photo_no-image.png';
+const PORT                          = 3030; // порт 3030
+
+const DEFAULT_AVATAR_SERVER_SRC     = './images/nodejs-logo.png';
+const WELCOME__MESSAGE              = 'Добро пожаловать в чат!';
+
+const SERVER__NAME                  = 'Node.JS Server';
+const SERVER_NICK_NAME              = 'WebSocket';
+
+const TEXT_TYPE                     = 'userText'; // тип сообщения - текст
+const USER_INFO_TYPE                = 'userInfo'; // тип сообщения - инфо о пользователе
+const USER_SAVE_AVATAR_TYPE         = 'userSaveAvatar'; // тип сообщения - сохранение аватара пользователя
+const GET_ALL_USERS_TYPE            = 'getAllUsers'; // тип сообщения - список и настройки пользователей
+const GET_ALL_MESSAGE_TYPE          = 'getAllMessages';
 
 const webSocket = require('ws'); // загружаем веб-сокет
 const server = new webSocket.Server({ // создаем новый вебсокет-сервер
@@ -48,6 +59,7 @@ class Clients {
 }
 
 const clients = new Clients();
+let logs = [];
 
 // ---------------------------------------------
 // Обработчик установки соединения с сервером
@@ -60,24 +72,36 @@ server.on('connection', ws => {
         const msgObject = JSON.parse(message);
         const nickName = msgObject.nickName.toLowerCase();
 
+        // обработаем тип сообщения от клиента в зависимости от типа
         switch (msgObject.type) {
-            case 'userInfo':
+
+            // тип - информация о подключенном пользователе
+            case USER_INFO_TYPE:
                 user = {...msgObject};
                 // проверим, зашел ли пользователь в первый раз
                 if (!clients.getClient(nickName)) { // нет такого пользователя с ником в текущем списке клиентов
                     clients.saveClient(nickName, user); // сохранить клиента
                 }
-                // TODO: отправить пользователю все сообщения из логов сообщений
+                // отправим все предыдущие сообщения текущему пользователю
+                sendMessagesFromLog(ws); 
+                // отправить информацию о пользователях всем клиентам
                 sendAllUsers();
                 break;
 
-            case 'userSaveAvatar':
+            // тип - сохранение аватара
+            case USER_SAVE_AVATAR_TYPE:
                 clients.saveClientAvatar(nickName, msgObject.avatar);
+                // обновим аватарки в логе сообщений у пользователя
+                logs = logs.map(msg => {
+                    msg.avatar = clients.getClient(msg.nickName).avatar;
+                    return msg;
+                });
                 sendAllUsers();
                 break;
         
+            // по-умолчанию - текстовое сообщение
             default:
-                // TODO: вести логи входящих сообщений
+                saveMessageToLog(msgObject);
                 sendMessage(message);
                 break;
         }
@@ -91,42 +115,59 @@ server.on('connection', ws => {
 
     // приветствие
     ws.send(JSON.stringify({
-        type: 'userText',
-        name: 'Node.JS Server',
-        nickName: 'WebSocket',
-        avatar: './images/nodejs-logo.png',
-        text: 'Добро пожаловать в чат!',
+        type: TEXT_TYPE,
+        name: SERVER__NAME,
+        nickName: SERVER_NICK_NAME,
+        avatar: DEFAULT_AVATAR_SERVER_SRC,
+        text: WELCOME__MESSAGE,
         date: new Date()
     }));
 });
 
+// ------------------------------------------------------------------
+// Функция, записывающая все входящие сообщения в контейнер сообщений
+// ------------------------------------------------------------------
+function saveMessageToLog(message) {
+    logs.push(message);
+}
+
+// -------------------------------------------------------
+// Функция отправки всех сообщений из контейнера сообщений
+// -------------------------------------------------------
+function sendMessagesFromLog(clientWebsocket) {
+    clientWebsocket.send(JSON.stringify(
+        {
+            type: GET_ALL_MESSAGE_TYPE,
+            users: clients.getAllClients(),
+            logs: logs
+        }
+    ));
+}
+
 // ---------------------------------------------
-// функция отправки сообщений всем пользователям
+// Функция отправки сообщений всем пользователям
 // ---------------------------------------------
 function sendMessage(message) {
     server.clients.forEach( client => {
         if (client.readyState === webSocket.OPEN) {
-            client.send(message); // TODO: составить тип сообщения
+            client.send(message); 
         }
     });
 }
 
 // ------------------------------------------
-// функция отправки списка всех пользователей
+// Функция отправки списка всех пользователей
 // ------------------------------------------
 function sendAllUsers() {
     server.clients.forEach( client => {
         if (client.readyState === webSocket.OPEN) {
             client.send(JSON.stringify({
-                type: 'getAllUsers',
+                type: GET_ALL_USERS_TYPE,
                 users: clients.getAllClients()
             }));
         }
     });
 }
-
-
-
 
 /* //-------------------------------
 //-------------------------------

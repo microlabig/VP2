@@ -6,7 +6,7 @@ section.chat
                     - for (var i = 0; i < 3; i++)
                         li.menu__button
                 .menu__search
-                    input(type="input" placeholder="Найти...")#findInput.menu__search-input
+                    input(type="input" placeholder="Найти..." autocomplete="off")#findInput.menu__search-input
             .members
                 ul.members__list#membersList
         .chat__right
@@ -22,5 +22,5 @@ section.chat
                 .main__footer
                     form(name="chatForm").form.form--chat
                         .form__container
-                            input(type="input" placeholder="Введите сообщение..." name="chatInput").form__input
+                            input(type="input" placeholder="Введите сообщение..." name="chatInput" autocomplete="off").form__input
                             button(type="button" name="chatButton" disabled="disabled").form__button Отправить
