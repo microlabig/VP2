@@ -96,7 +96,7 @@ function isMatching(full, chunk) {
     let fullStr = full.toLowerCase(),
         chunkStr = chunk.toLowerCase();
 
-    return fullStr.indexOf(chunkStr) !== -1 ? true : false;
+    return fullStr.indexOf(chunkStr) !== -1;
 }
 
 // ----------------------------------------------------------------------------
@@ -302,6 +302,12 @@ function renderMessage(message) {
         
         pushAvatarElementInContainer(message.nickName, imageElement); // запомнить элемент-изображения в контейнере изображений аватара пользователя
     }
+
+    const mainContent = document.querySelector('.main__content');
+    mainContent.scrollTop = mainContent.scrollHeight;
+    const offset = chatList.scrollTop;
+    console.log(offset);
+    
 }
 
 // ---------------------------------------
@@ -674,6 +680,6 @@ chatInput.addEventListener('keydown', event => {
 // отправка сообщения на сервер
 chatButton.addEventListener('click', () => {
     const value = chatInput.value;
-    
+
     sendMessage(value);
 });

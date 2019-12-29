@@ -9,21 +9,37 @@
     margin-bottom: 20px;
 }
 
-.menu__addition {
+.menu__options {
     cursor: pointer;
     
     margin: auto 10px auto 0;
 }
 
 .menu__button {
+    position: relative;
+
     width: 18px;
     height: 2px;
     background-color: $text-placeholder-color;
-
+    
+    //margin: auto 10px auto 0;
     margin-bottom: 3px;
 
-    &:last-child {
-        margin-bottom: 0;
+    // &:last-child {
+    //     margin-bottom: 0;
+    // }
+    &:before, &:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: -5px;
+        display: inline-block;
+        width: 18px;
+        height: 2px;
+        background-color: $text-placeholder-color;
+    }
+    &:after {
+        top: -10px;
     }
 }
 
