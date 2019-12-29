@@ -1,12 +1,14 @@
 .messages {
-    padding: 4px 12px;
-    height: 100%;
+    padding: 0 12px;
+    //height: 100%;
 }
 
 .messages__list {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
+
+    padding: 4px 0;
 
     //overflow-y: auto;
 }

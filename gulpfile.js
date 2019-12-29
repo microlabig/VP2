@@ -69,8 +69,9 @@ task('styles', () => {
 // таск скриптов
 task('scripts', () => {
     return src([...JS_LIBS, `${SRC_PATH}/scripts/**/*.js`])
+    //return src([...JS_LIBS, `${SRC_PATH}/scripts/main.js`])
         .pipe(gulpif(env === 'dev', sourcemaps.init()))
-        .pipe(concat('main.min.js', { newLine: ";" }))
+        //.pipe(concat('main.min.js', { newLine: ";" }))
         .pipe(gulpif(env === 'build', babel(
             {
                 presets: [
@@ -86,12 +87,13 @@ task('scripts', () => {
                 ]
             }
         )))
-        .pipe(gulpif(env === 'build', browserify({
-            insertGlobals: true
-        })))
+        // .pipe(gulpif(env === 'build', browserify({
+        //     insertGlobals: true
+        // })))
         .pipe(gulpif(env === 'build', uglify()))
         .pipe(gulpif(env === 'dev', sourcemaps.write()))
-        .pipe(dest(`${DIST_PATH}`))
+        .pipe(dest(`${DIST_PATH}/scripts`))
+        //.pipe(dest(`${DIST_PATH}/main.min.js`))
         .pipe(reload({ stream: true }));
 });
 
