@@ -1,0 +1,7 @@
+script(type="text/x-pug-template")#members
+    li.members__item
+        .members__avatar
+            +image("members","{{path}}")
+        .members__info
+            .members__name {{name}}
+            .members__lastmessage {{text}}

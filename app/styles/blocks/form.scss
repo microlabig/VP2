@@ -10,6 +10,10 @@
             padding: 10px 12px;
         }
 
+        .form__label {
+            margin-bottom: 0;
+        }
+
         .form__input {
             border: none;
         }
@@ -31,6 +35,8 @@
 .form__label {
     display: inline-block;
     text-align: center;
+    
+    width: 100%;
 
     margin-bottom: 48px;
 }
@@ -55,8 +61,16 @@
     
     padding: 15px 10px;
 
+    transition: $delay;
+
     &::placeholder {
         color: $text-placeholder-color;
+    }
+
+    &.error {
+        &::placeholder {
+            color: $error-color;
+        }
     }
 }
 
@@ -75,7 +89,12 @@
     margin: 0 auto;
 
     transition: background-color $delay;
+    
     &:hover {
         background-color: $bg-button-hover-color;
+    }
+
+    &:disabled {
+        background-color: $bg-input-color;
     }
 }

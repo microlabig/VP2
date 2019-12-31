@@ -1,16 +1,49 @@
 .auth {
+    transition: $delay;
+
+    &.hidden {
+        z-index: 0;
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+    }
+    
+    &.show {
+        z-index: 1;
+        opacity: 1;
+        visibility: visible;
+        overflow: visible
+    }
+
+    & .container{
+        position: absolute;
+    
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        
+        background-color: rgba($black-color, 0.5);
+    }
+}
+
+.auth__wrapper {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
     width: 50%;
     max-width: 520px;
     background-color: $bg-layout-color;
 
-    & .container{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-        padding: 47px 80px;
-    }
+    padding: 47px 80px;
 }
 
 .auth__title {

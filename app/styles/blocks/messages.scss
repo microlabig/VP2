@@ -1,17 +1,39 @@
 .messages {
-    padding: 4px 12px;
+    padding: 0 12px;
+    //height: 100%;
 }
 
 .messages__list {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
+
+    padding: 4px 0;
+
+    //overflow-y: auto;
 }
 
 .messages__item {
     display: flex;
 
-    &.messages__item--me {
+    margin-bottom: 4px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &.hidden { // для скрытия аватарки и изменение формы сообщения
+        .messages__avatar {
+            visibility: hidden;
+            opacity: 0;
+        }
+        .messages__message:before {
+            display: none;
+        }
+    }
+
+    // my messages
+    &.me {
         flex-direction: row-reverse;
         justify-content: flex-start;
 
@@ -29,7 +51,7 @@
         .messages__message {
             background-color: $bg-my-message-color;
 
-            &:first-child::before {
+            &:before {
                 right: -6px;
                 left: auto;
 
@@ -40,37 +62,37 @@
 }
 
 .messages__avatar {
-    flex-shrink: 0;
     position: relative;
+    flex-shrink: 0;
+    align-self: flex-end;
+
     width: 34px;
     height: 34px;
 
-    overflow: hidden;
-    border-radius: 50%;
+    visibility: visible;
+    opacity: 1;
 
     background-color: $bg-element-color;
-    margin-right: 10px;
-}
+    border-radius: 50%;
+    overflow: hidden;
 
-.messages__content {
-    margin-bottom: 4px;
-    flex: 0.45;
+    margin-right: 10px;
 }
 
 .messages__message {
     position: relative;
     display: flex;
-    align-items: center;
-
-    padding: 10px 16px;
-    border-radius: $border-radius-button;
+    flex-direction: column;
+    
     background-color: $bg-message-color;
-
+    border-radius: $border-radius-button;
+    
     width: fit-content;
+    max-width: 43.5%;
 
-    margin-bottom: 4px;
+    padding: 12px 17px;
 
-    &:first-child::before {
+    &:before {
         content: '';
         display: inline-block;
         position: absolute;
@@ -85,22 +107,13 @@
         background: url('./images/shape_left.png') center center no-repeat;
         background-size: contain;
     }
-
-    &:last-child {
-        margin-bottom: 0;
-    }
 }
 
 .messages__text {
-    margin-right: 15px;
+    word-wrap: break-word;
 }
 
-.messages__data {
-    position: relative;
-    top: 7px;
-    left: 7px;
-
-    margin-left: auto;
-    margin-top: auto;
+.messages__info {
+    align-self: flex-end;
     color: rgba($text-color, .4);
 }

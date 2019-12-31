@@ -1,0 +1,135 @@
+.options {
+    transition: $delay;
+
+    &.hidden {
+        z-index: 0;
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+    }
+
+    &.show {
+        z-index: 1;
+        opacity: 1;
+        visibility: visible;
+        overflow: visible
+    }
+
+    & .container{
+        position: absolute;
+    
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        
+        background-color: rgba($black-color, 0.5);
+    }
+}
+
+.options__wrapper {
+    position: absolute;
+    
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background-color: $bg-layout-color;
+    border-radius: $border-radius-button;
+
+    min-width: 364px;
+
+    padding: 20px;
+}
+
+// close button
+
+.options__close {
+    cursor: pointer;
+    position: relative;
+
+    width: 16px;
+    height: 16px;
+
+    right: calc(16px - 100%);
+}
+
+.options__button {
+    padding: 0;
+   
+    &:before, &:after {
+        content: '';
+        display: inline-block;
+        position: absolute;
+
+        width: 22px;
+        height: 2px;
+
+        top: 50%;
+        left: 0;
+        transform: rotate(45deg);
+
+        background-color: $text-placeholder-color;
+    }
+
+    &:after {
+        transform: rotate(-45deg);
+    }
+}
+
+// options content
+
+.options__photo {
+    padding-left: 10px;
+}
+
+.options__title {
+    font-size: 18px;
+    margin-bottom: 40px;
+}
+
+.options__content {
+    display: flex;
+    align-items: center;
+}
+
+.options__left {
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+
+    width: 90px;
+    height: 90px;
+
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: $bg-element-color;
+
+    margin-right: 13px;
+}
+
+.options__avatar {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    font-size: 24px;
+    color: $text-color;
+}
+
+.options__name {
+    word-wrap: unset;
+    font-size: 18px;
+    
+    margin-bottom: 5px;
+}
+
+.options__status {
+    color: $text-placeholder-color;
+
+    &.online {
+        color: $bg-button-color;
+    }
+}

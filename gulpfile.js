@@ -58,7 +58,7 @@ task('styles', () => {
             rem: 16,            // root element (html) font-size (default: 16)
             one: false          // whether convert 1px to rem (default: false)
         }))
-        .pipe(gulpif(env === 'dev', autoprefixer({ cascade: false })))
+        .pipe(gulpif(env === 'build', autoprefixer({ cascade: false })))
         .pipe(gulpif(env === 'build', gcmq()))
         .pipe(gulpif(env === 'build', cleanCSS()))
         .pipe(gulpif(env === 'dev', sourcemaps.write()))
@@ -69,8 +69,9 @@ task('styles', () => {
 // таск скриптов
 task('scripts', () => {
     return src([...JS_LIBS, `${SRC_PATH}/scripts/**/*.js`])
+    //return src([...JS_LIBS, `${SRC_PATH}/scripts/main.js`])
         .pipe(gulpif(env === 'dev', sourcemaps.init()))
-        .pipe(concat('main.min.js', { newLine: ";" }))
+        //.pipe(concat('main.min.js', { newLine: ";" }))
         .pipe(gulpif(env === 'build', babel(
             {
                 presets: [
@@ -86,12 +87,13 @@ task('scripts', () => {
                 ]
             }
         )))
-        .pipe(gulpif(env === 'build', browserify({
-            insertGlobals: true
-        })))
+        // .pipe(gulpif(env === 'build', browserify({
+        //     insertGlobals: true
+        // })))
         .pipe(gulpif(env === 'build', uglify()))
         .pipe(gulpif(env === 'dev', sourcemaps.write()))
-        .pipe(dest(`${DIST_PATH}`))
+        .pipe(dest(`${DIST_PATH}/scripts`))
+        //.pipe(dest(`${DIST_PATH}/main.min.js`))
         .pipe(reload({ stream: true }));
 });
 
@@ -158,7 +160,8 @@ task('server', () => {
         server: {
             baseDir: `./${DIST_PATH}`
         },
-        open: false
+        open: false,
+        ghostMode: false // для отключения синхронизации в случае открытия нескольких окон
     });
 });
 

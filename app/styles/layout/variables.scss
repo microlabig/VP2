@@ -1,6 +1,8 @@
 //Шрифт
 $normal: 400;
 
+$black-color: black;
+
 $text-color: white;
 $text-description-color: #7f91a4;
 $text-placeholder-color: #5d6873;
@@ -10,10 +12,13 @@ $bg-layout-color: #17212b;
 $bg-chat-color: #0e1621;
 $bg-element-color: #242f3d;
 $bg-button-color: #5288c1;
+$bg-button-photo-color: #1d2a39;
 $bg-button-hover-color: #306298;
 $bg-input-color: #242f3d;
 $bg-message-color: #182533;
 $bg-my-message-color: #2b5278;
+
+$error-color: rgba(red, .5);
 
 $border-radius-button: 6px;
 

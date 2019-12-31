@@ -1,0 +1,9 @@
+script(type="text/x-pug-template")#message
+    li(class="messages__item {{me}} {{hidden}}" data-nickname="{{nickName}}")
+        .messages__avatar
+            +image("messages","{{path}}")
+        .messages__message
+            .messages__text {{text}}
+            .messages__info
+                span.messages__nick {{nickName}}: 
+                span.messages__data {{date}}

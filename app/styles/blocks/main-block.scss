@@ -1,11 +1,13 @@
 .main {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     grid-template-rows: 70px 1fr 66px;
     grid-template-areas: 
         "header header header"
         "content content content"
         "footer footer footer";
+    /* display: flex;
+    flex-direction: column; */
 
     height: 100%;
     border-left: 1px solid $bg-chat-color;
@@ -19,6 +21,9 @@
 .main__content {
     grid-area: content;
     background-color: $bg-chat-color;
+    //height: 100%;
+    height: calc(100vh - 136px); 
+    overflow-y: auto;
 }
 
 .main__footer {

@@ -1,0 +1,18 @@
+#loadhoto.loadphoto.hidden
+    .container
+        .loadphoto__wrapper
+            label.loadphoto__avatar
+                #dragContainer.loadphoto__image-container(draggable="true")
+                    input(type="file").loadphoto__input
+                    #loadPhotoImage
+            .loadphoto__description Область для профильной фотографии
+            .loadphoto__controls
+                button(type="button").loadphoto__button.cancel Отмена
+                button(type="submit").loadphoto__button.apply Сохранить
+
+script(type="text/x-pug-template")#loadPhotoIcon
+        .loadphoto__image
+            ul.loadphoto__overlay
+                - for (var i = 0; i < 4; i++)
+                    li.loadphoto__dots
+            +image("loadphoto","{{path}}")
