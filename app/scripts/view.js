@@ -4,6 +4,8 @@
 const SERVER_NICK_NAME = 'WebSocket'; // ник сервера
 const USER_SAVE_AVATAR_TYPE = 'userSaveAvatar'; // тип сообщения - сохранение аватара пользователя
 
+const fragmentContainer = new DocumentFragment(); // фрагмент 
+
 // -------------------------------------------------------------------------------------
 // Функция добавления элемента-изображения в контейнер пользователя с ником userNickName
 // -------------------------------------------------------------------------------------
@@ -150,11 +152,22 @@ function changeFile(event) {
     return file;
 }
 
+// -----------------------------------------------------------------------------------
+// Функция проверяет - встречается ли подстрока chunk в строке full без учета регистра
+// -----------------------------------------------------------------------------------
+export function isMatching(full, chunk) {
+    let fullStr = full.toLowerCase(),
+        chunkStr = chunk.toLowerCase();
+
+    return fullStr.indexOf(chunkStr) !== -1;
+}
+
+
 
 // ----------------------------
 // Функция рендеринга сообщения
 // ----------------------------
-export function renderMessage(message, {fragmentContainer, me, users}) {
+export function renderMessage(message, {me, users}) {
     const chatList = document.querySelector('#chatList'); // контейнер сообщений
     const messageTemplate = document.querySelector('#message').textContent; // шаблон сообщения
     const render = Handlebars.compile(messageTemplate); // создадим функцию-рендер html-содержимого
@@ -185,7 +198,7 @@ export function renderMessage(message, {fragmentContainer, me, users}) {
 // ---------------------------------------
 // Функция рендеринга списка пользователей
 // ---------------------------------------
-export function renderUsers({users, me, fragmentContainer}) {
+export function renderUsers({users, me}) {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
     const userTemplate = document.querySelector('#members').textContent; // шаблон пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
@@ -215,7 +228,7 @@ export function renderUsers({users, me, fragmentContainer}) {
 // ------------------------------------------------------------------------
 // Функция рендеринга списка найденных пользователей по ключевой строке str
 // ------------------------------------------------------------------------
-export function renderFindedUsers(str) {
+export function renderFindedUsers({str, users}) {
     const memberList = document.getElementById('membersList'); // контейнер пользователей
     const userTemplate = document.querySelector('#members').textContent; // шаблон искомого пользователя
     const render = Handlebars.compile(userTemplate); // создадим функцию-рендер html-содержимого
@@ -236,7 +249,7 @@ export function renderFindedUsers(str) {
 // -------------------------------------------
 // Функция рендеринга количества пользователей
 // -------------------------------------------
-function renderQuantityUsers({fragmentContainer, users}) {
+function renderQuantityUsers({users}) {
     const usersQuantity = document.getElementById('usersQuantity'); // контейнер количества пользователей
     const qMembers = document.querySelector('#qmembers').textContent; // шаблон 
     const render = Handlebars.compile(qMembers); // создадим функцию-рендер html-содержимого
