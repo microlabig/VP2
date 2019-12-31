@@ -1,3 +1,7 @@
+/* *****************************************************************************
+ *                          C O N T R O L L E R
+ *****************************************************************************/
+
 import {
     PATH_WS_SERVER,
     TEXT_TYPE, USER_INFO_TYPE, GET_ALL_USERS_TYPE, GET_ALL_MESSAGE_TYPE,
@@ -9,6 +13,13 @@ import {
     renderMessage, renderUsers, renderFindedUsers,
     renderOptionsPopup, hidePopup, showPopup, renderAllAvatars
 } from './view.js';
+
+let me = null; // я
+let users = []; // список всех пользователей чата
+let usersAvatarsContainer = new Map(); // карта соответствия контейнеров элементов-изображений по нику пользователя
+let webSocket = null; // вебсокет
+
+let messageFromServer = {}; // сообщение от сервера
 
 // ----------------------------------------------------------
 // Функция обновления информации о списке пользователей
@@ -65,19 +76,6 @@ function refreshUsersArray(message) {
         }
     }
 }
-
-
-
-/* *****************************************************************************
- *                          C O N T R O L L E R
- *****************************************************************************/
-
-let me = null; // я
-let users = []; // список всех пользователей чата
-let usersAvatarsContainer = new Map(); // карта соответствия контейнеров элементов-изображений по нику пользователя
-let webSocket = null; // вебсокет
-
-let messageFromServer = {}; // сообщение от сервера
 
 // ----------------------------------
 // Функция работы с вебсокет-сервером
