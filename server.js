@@ -12,7 +12,6 @@ const USER_SAVE_AVATAR_TYPE         = 'userSaveAvatar'; // тип сообщен
 const GET_ALL_USERS_TYPE            = 'getAllUsers'; // тип сообщения - список и настройки пользователей
 const GET_ALL_MESSAGE_TYPE          = 'getAllMessages';
 
-const os = require('os');
 const webSocket = require('ws'); // загружаем веб-сокет
 const server = new webSocket.Server({ // создаем новый вебсокет-сервер
   port: PORT,
