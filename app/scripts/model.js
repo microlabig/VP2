@@ -6,7 +6,7 @@ export const USER_INFO_TYPE = 'userInfo'; // тип сообщения - инф�
 export const GET_ALL_USERS_TYPE = 'getAllUsers'; // тип сообщения - список и настройки пользователей
 export const GET_ALL_MESSAGE_TYPE = 'getAllMessages'; // тип сообщения - все сообщения
 
-export const PATH_WS_SERVER = process.env.NODE_ENV && process.env.NODE_ENV === 'build' ? 'ws://microlabig-wschat.herokuapp.com/' : 'ws://localhost:3030'; // адрес вебсокет-сервера
+export const PATH_WS_SERVER = 'ws://microlabig-wschat.herokuapp.com/'; // 'ws://localhost:3030'; // адрес вебсокет-сервера
 export const ENTER_KEY = 13; // код клавиши <ENTER>
 
 const DEFAULT_AVATAR_SRC = './images/photo_no-image.png'; // аватар по-умолчанию
