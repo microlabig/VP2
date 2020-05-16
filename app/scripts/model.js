@@ -6,7 +6,7 @@ export const USER_INFO_TYPE = 'userInfo'; // тип сообщения - инф�
 export const GET_ALL_USERS_TYPE = 'getAllUsers'; // тип сообщения - список и настройки пользователей
 export const GET_ALL_MESSAGE_TYPE = 'getAllMessages'; // тип сообщения - все сообщения
 
-export const PATH_WS_SERVER = 'ws://microlabig-wschat.herokuapp.com/'; // адрес вебсокет-сервера
+export const PATH_WS_SERVER = process.env.NODE_ENV && process.env.NODE_ENV === 'build' ? 'ws://microlabig-wschat.herokuapp.com/' : 'ws://localhost:3030'; // адрес вебсокет-сервера
 export const ENTER_KEY = 13; // код клавиши <ENTER>
 
 const DEFAULT_AVATAR_SRC = './images/photo_no-image.png'; // аватар по-умолчанию
@@ -52,7 +52,7 @@ export class User {
 // -----------------------------------------------
 // Функция отправки текстового сообщения на сервер
 // -----------------------------------------------
-export function sendMessage(text, {webSocket, me, chatInput, chatButton}) {
+export function sendMessage(text, { webSocket, me, chatInput, chatButton }) {
     webSocket.send(JSON.stringify(me.getMessageData(TEXT_TYPE, text))); // отправить сообщение
     chatInput.value = ''; // обнулить инпут чата
     chatButton.setAttribute('disabled', 'disabled'); // задисаблить кнопку отправки сообщения
