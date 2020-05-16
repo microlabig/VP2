@@ -75,16 +75,19 @@ task('scripts', () => {
         .pipe(gulpif(env === 'build', babel(
             {
                 presets: [
-                    "@babel/preset-env"
-                ],
-                plugins: [
                     [
-                        "@babel/plugin-transform-runtime",
-                        {
-                            "regenerator": true
+                        "@babel/preset-env", {
+                            "targets": {
+                                "browsers": ["last 2 versions"]
+                            },
+                            // "debug": true,
+                            "modules": "commonjs"
                         }
                     ]
-                ]
+                ],
+                // plugins: [
+                //     ["@babel/plugin-transform-runtime", { "regenerator": true }]
+                // ]
             }
         )))
         // .pipe(gulpif(env === 'build', browserify({
