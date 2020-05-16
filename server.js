@@ -1,4 +1,4 @@
-const PORT                          = 3030; // порт 3030
+const PORT                          = process.env.PORT || 3030; // порт 3030
 
 const DEFAULT_AVATAR_SERVER_SRC     = './images/nodejs-logo.png';
 const WELCOME__MESSAGE              = 'Добро пожаловать в чат!';
@@ -12,6 +12,7 @@ const USER_SAVE_AVATAR_TYPE         = 'userSaveAvatar'; // тип сообщен
 const GET_ALL_USERS_TYPE            = 'getAllUsers'; // тип сообщения - список и настройки пользователей
 const GET_ALL_MESSAGE_TYPE          = 'getAllMessages';
 
+const os = require('os');
 const webSocket = require('ws'); // загружаем веб-сокет
 const server = new webSocket.Server({ // создаем новый вебсокет-сервер
   port: PORT,
@@ -169,13 +170,11 @@ function sendAllUsers() {
     });
 }
 
-/* //-------------------------------
 //-------------------------------
 console.info(`
     Добро пожаловать на сервер
-    Путь: ws://localhost:${PORT}
-
+    Сервер запущен на порту ${PORT}
+    
     <CTRL> + <C> для выхода
 `);
 //-------------------------------
-//------------------------------- */

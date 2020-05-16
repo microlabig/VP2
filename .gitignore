@@ -1,9 +1,12 @@
-node_modules
+/node_modules
+npm_debug.log
 dist
 
 .DS_Store
 .vscode
 .idea
+
+/*.env
 
 *.log
 

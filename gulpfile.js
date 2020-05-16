@@ -72,28 +72,28 @@ task('scripts', () => {
     //return src([...JS_LIBS, `${SRC_PATH}/scripts/main.js`])
         .pipe(gulpif(env === 'dev', sourcemaps.init()))
         //.pipe(concat('main.min.js', { newLine: ";" }))
-        .pipe(gulpif(env === 'build', babel(
-            {
-                presets: [
-                    [
-                        "@babel/preset-env", {
-                            "targets": {
-                                "browsers": ["last 2 versions"]
-                            },
-                            // "debug": true,
-                            "modules": "commonjs"
-                        }
-                    ]
-                ],
-                // plugins: [
-                //     ["@babel/plugin-transform-runtime", { "regenerator": true }]
-                // ]
-            }
-        )))
+        // .pipe(gulpif(env === 'build', babel(
+        //     {
+        //         presets: [
+        //             [
+        //                 "@babel/preset-env", {
+        //                     "targets": {
+        //                         "browsers": ["last 2 versions"]
+        //                     },
+        //                     // "debug": true,
+        //                     "modules": "commonjs"
+        //                 }
+        //             ]
+        //         ],
+        //         plugins: [
+        //             ["@babel/plugin-transform-runtime", { "regenerator": true }]
+        //         ]
+        //     }
+        // )))
         // .pipe(gulpif(env === 'build', browserify({
         //     insertGlobals: true
         // })))
-        .pipe(gulpif(env === 'build', uglify()))
+        // .pipe(gulpif(env === 'build', uglify()))
         .pipe(gulpif(env === 'dev', sourcemaps.write()))
         .pipe(dest(`${DIST_PATH}/scripts`))
         //.pipe(dest(`${DIST_PATH}/main.min.js`))
